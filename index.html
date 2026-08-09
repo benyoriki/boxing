@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>DUEL BOXING</title>
+<meta name="description" content="Cari lawan, match, dan bertanding dalam duel olahraga 1v1 yang aman dan terkontrol.">
+<meta name="theme-color" content="#05070f">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="assets/icons/icon-192.svg">
+<link rel="apple-touch-icon" href="assets/icons/icon-192.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/responsive.css">
+<link rel="stylesheet" href="css/animations.css">
+</head>
+<body>
+
+<!-- ============ AUTH SCREEN ============ -->
+<div id="view-auth" class="auth-screen">
+  <div class="auth-bg">
+    <div class="grid-lines"></div>
+    <div class="glow-orb orb-blue"></div>
+    <div class="glow-orb orb-purple"></div>
+  </div>
+  <div class="auth-card glass">
+    <div class="auth-logo">
+      <svg class="logo-mark" viewBox="0 0 48 48" width="40" height="40" aria-hidden="true">
+        <path d="M24 3 L41 13 V33 L24 45 L7 33 V13 Z" fill="none" stroke="url(#lg)" stroke-width="2.5"/>
+        <path d="M17 24 L22 29 L32 17" fill="none" stroke="url(#lg)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+        <defs><linearGradient id="lg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2fd8ff"/><stop offset="1" stop-color="#9b6bff"/></linearGradient></defs>
+      </svg>
+      <span>DUEL <b>BOXING</b></span>
+    </div>
+    <p class="auth-tagline">Temukan lawan. Ajukan tantangan. Bertanding di ring.</p>
+
+    <div class="auth-tabs">
+      <button class="auth-tab active" data-tab="login">Masuk</button>
+      <button class="auth-tab" data-tab="register">Daftar</button>
+    </div>
+
+    <form id="form-login" class="auth-form">
+      <label>Username atau Email
+        <input type="text" id="login-id" required placeholder="RAVEN_X">
+      </label>
+      <label>Password
+        <input type="password" id="login-pass" required placeholder="••••••••">
+      </label>
+      <label class="checkbox-row"><input type="checkbox" id="login-remember" checked> Ingat saya</label>
+      <button type="submit" class="btn btn-primary btn-block">MASUK RING</button>
+      <p class="auth-hint">Demo: gunakan akun apa saja, atau <button type="button" id="btn-demo-login" class="link-btn">masuk sebagai tamu demo</button>.</p>
+    </form>
+
+    <form id="form-register" class="auth-form hidden">
+      <label>Username
+        <input type="text" id="reg-username" required placeholder="SHADOW99">
+      </label>
+      <label>Email
+        <input type="email" id="reg-email" required placeholder="kamu@email.com">
+      </label>
+      <label>Password
+        <input type="password" id="reg-pass" required minlength="4" placeholder="••••••••">
+      </label>
+      <label>Konfirmasi Password
+        <input type="password" id="reg-pass2" required minlength="4" placeholder="••••••••">
+      </label>
+      <button type="submit" class="btn btn-primary btn-block">BUAT AKUN</button>
+    </form>
+    <p class="auth-error" id="auth-error"></p>
+  </div>
+</div>
+
+<!-- ============ APP SHELL ============ -->
+<div id="app" class="app hidden">
+
+  <!-- Desktop Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <svg viewBox="0 0 48 48" width="28" height="28" aria-hidden="true">
+        <path d="M24 3 L41 13 V33 L24 45 L7 33 V13 Z" fill="none" stroke="url(#lg2)" stroke-width="2.5"/>
+        <path d="M17 24 L22 29 L32 17" fill="none" stroke="url(#lg2)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+        <defs><linearGradient id="lg2" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2fd8ff"/><stop offset="1" stop-color="#9b6bff"/></linearGradient></defs>
+      </svg>
+      <span>DUEL<b>BOXING</b></span>
+    </div>
+    <nav class="sidebar-nav">
+      <button class="nav-item active" data-view="map"><span class="nav-ico">🗺️</span>Map</button>
+      <button class="nav-item" data-view="duel"><span class="nav-ico">⚔️</span>Find Opponent</button>
+      <button class="nav-item" data-view="matches"><span class="nav-ico">👥</span>Matches</button>
+      <button class="nav-item" data-view="rank"><span class="nav-ico">🏆</span>Ranking</button>
+      <button class="nav-item" data-view="tournament"><span class="nav-ico">🎟️</span>Tournament</button>
+      <button class="nav-item" data-view="profile"><span class="nav-ico">👤</span>Profile</button>
+      <button class="nav-item" data-view="rules"><span class="nav-ico">🛡️</span>Safety & Rules</button>
+      <button class="nav-item" data-view="admin" id="nav-admin" hidden><span class="nav-ico">🛠️</span>Admin</button>
+    </nav>
+    <button class="btn btn-ghost btn-block" id="btn-logout">Keluar</button>
+  </aside>
+
+  <!-- Main column -->
+  <div class="main-col">
+    <header class="topbar">
+      <div class="topbar-user">
+        <div class="avatar-ring sm" id="topbar-avatar">R</div>
+        <div class="topbar-user-info">
+          <strong id="topbar-username">RAVEN_X</strong>
+          <span class="status-dot online"></span>
+        </div>
+      </div>
+      <div class="topbar-stats">
+        <div class="stat-chip"><span class="stat-label">LVL</span><span id="topbar-level">24</span></div>
+        <div class="stat-chip"><span class="stat-label">RATING</span><span id="topbar-rating">1287</span></div>
+      </div>
+      <button class="icon-btn" id="btn-notif">🔔<span class="notif-dot hidden" id="notif-dot"></span></button>
+    </header>
+
+    <main class="content">
+
+      <!-- MAP VIEW -->
+      <section id="view-map" class="view active">
+        <div class="view-head">
+          <h1>Map Arena</h1>
+          <button class="btn btn-secondary btn-sm" id="btn-filters">Filter</button>
+        </div>
+        <div class="map-search">
+          <input type="text" id="map-search-input" placeholder="🔎 Cari pemain...">
+        </div>
+        <div class="activity-ticker" id="activity-ticker">
+          <span class="live-dot"></span>
+          <span id="activity-ticker-text">Memantau aktivitas arena...</span>
+        </div>
+        <div id="leaflet-map" class="leaflet-map"></div>
+        <div class="map-empty hidden" id="map-empty">
+          <p>Tidak ada challenger di sekitar kamu.</p>
+          <button class="btn btn-secondary" id="btn-expand-radius">PERLUAS RADIUS</button>
+        </div>
+      </section>
+
+      <!-- FIND OPPONENT / SWIPE VIEW -->
+      <section id="view-duel" class="view">
+        <div class="view-head">
+          <h1>Find Opponent</h1>
+        </div>
+        <div class="swipe-stage" id="swipe-stage"></div>
+        <div class="swipe-actions">
+          <button class="swipe-btn pass" id="btn-pass" aria-label="Pass">✕</button>
+          <button class="swipe-btn like" id="btn-challenge" aria-label="Challenge">⚔️</button>
+        </div>
+        <div class="swipe-empty hidden" id="swipe-empty">
+          <p>Tidak ada challenger di sekitar kamu.</p>
+          <button class="btn btn-secondary" id="btn-swipe-reset">MUAT ULANG</button>
+        </div>
+      </section>
+
+      <!-- MATCHES VIEW -->
+      <section id="view-matches" class="view">
+        <div class="view-head"><h1>Matches</h1></div>
+        <div id="matches-list" class="matches-list"></div>
+        <div class="empty-state hidden" id="matches-empty">
+          <p>Belum ada match. Coba cari lawan di halaman Find Opponent.</p>
+        </div>
+      </section>
+
+      <!-- RANKING VIEW -->
+      <section id="view-rank" class="view">
+        <div class="view-head"><h1>Global Rank</h1></div>
+        <div class="rank-filters">
+          <button class="chip active" data-scope="global">GLOBAL</button>
+          <button class="chip" data-scope="country">COUNTRY</button>
+          <button class="chip" data-scope="city">CITY</button>
+          <button class="chip" data-scope="friends">FRIENDS</button>
+        </div>
+        <div id="rank-list" class="rank-list"></div>
+      </section>
+
+      <!-- TOURNAMENT VIEW -->
+      <section id="view-tournament" class="view">
+        <div class="view-head"><h1>Tournament</h1></div>
+        <div id="tournament-panel"></div>
+      </section>
+
+      <!-- PROFILE VIEW -->
+      <section id="view-profile" class="view">
+        <div class="view-head"><h1>Profile</h1></div>
+        <div id="profile-panel"></div>
+      </section>
+
+      <!-- COMMUNITY RULES VIEW -->
+      <section id="view-rules" class="view">
+        <div class="view-head"><h1>Safety &amp; Community Rules</h1></div>
+        <div class="rules-card glass">
+          <p class="rules-notice">⚠️ Pertandingan fisik hanya boleh dilakukan di tempat yang aman/resmi, dengan persetujuan kedua pihak dan pengawasan yang sesuai (pelatih, wasit, atau petugas gym). DUEL BOXING adalah platform untuk mempertemukan dan menjadwalkan pertandingan olahraga bela diri secara terkontrol — bukan ajakan kekerasan.</p>
+          <ol class="rules-list">
+            <li>Semua pertandingan harus berdasarkan persetujuan kedua pihak.</li>
+            <li>Tidak boleh melakukan kekerasan di luar arena/pertandingan resmi.</li>
+            <li>Dilarang mengancam pengguna.</li>
+            <li>Dilarang membagikan alamat pribadi.</li>
+            <li>Dilarang melakukan doxxing.</li>
+            <li>Gunakan lokasi pertandingan yang aman dan resmi.</li>
+            <li>Hormati keputusan lawan.</li>
+            <li>Admin berhak memblokir akun yang melanggar aturan.</li>
+          </ol>
+          <div class="rules-emergency">
+            <strong>Butuh bantuan darurat?</strong>
+            <p>Jika kamu atau orang lain dalam bahaya, hubungi layanan darurat setempat (di Indonesia: 112) sebelum melakukan hal lain.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ADMIN VIEW -->
+      <section id="view-admin" class="view">
+        <div class="view-head"><h1>Admin Dashboard</h1></div>
+        <div id="admin-panel"></div>
+      </section>
+
+    </main>
+
+    <!-- Mobile bottom nav -->
+    <nav class="bottom-nav">
+      <button class="bn-item active" data-view="map"><span>🗺️</span>Map</button>
+      <button class="bn-item" data-view="duel"><span>⚔️</span>Duel</button>
+      <button class="bn-item" data-view="matches"><span>👥</span>Match</button>
+      <button class="bn-item" data-view="rank"><span>🏆</span>Rank</button>
+      <button class="bn-item" data-view="profile"><span>👤</span>Profile</button>
+    </nav>
+  </div>
+
+  <!-- Right panel (desktop) -->
+  <aside class="right-panel" id="right-panel">
+    <h3>Player Info</h3>
+    <div id="right-panel-content" class="right-panel-empty">Pilih pemain di map untuk melihat detail.</div>
+  </aside>
+</div>
+
+<!-- ============ MODALS / OVERLAYS ============ -->
+
+<div id="modal-player" class="modal-backdrop hidden">
+  <div class="modal glass" id="modal-player-content"></div>
+</div>
+
+<div id="modal-match-found" class="modal-backdrop hidden">
+  <div class="match-found-card">
+    <h2 class="match-found-title">IT'S A MATCH!</h2>
+    <p class="match-found-sub">DUEL MATCH FOUND</p>
+    <div class="match-found-avatars" id="match-found-avatars"></div>
+    <div class="match-found-actions">
+      <button class="btn btn-secondary" id="btn-mf-later">NANTI</button>
+      <button class="btn btn-primary" id="btn-mf-open">LIHAT MATCH</button>
+    </div>
+  </div>
+</div>
+
+<div id="modal-challenge" class="modal-backdrop hidden">
+  <div class="modal glass" id="modal-challenge-content"></div>
+</div>
+
+<div id="modal-incoming" class="modal-backdrop hidden">
+  <div class="modal glass" id="modal-incoming-content"></div>
+</div>
+
+<div id="modal-duelroom" class="modal-backdrop hidden">
+  <div class="duelroom" id="duelroom-content"></div>
+</div>
+
+<div id="modal-chat" class="modal-backdrop hidden">
+  <div class="chat-panel glass" id="chat-panel-content"></div>
+</div>
+
+<div id="modal-notif" class="modal-backdrop hidden">
+  <div class="notif-panel glass" id="notif-panel-content"></div>
+</div>
+
+<div id="modal-filters" class="modal-backdrop hidden">
+  <div class="modal glass" id="modal-filters-content"></div>
+</div>
+
+<div id="toast-container" class="toast-container"></div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="js/data.js"></script>
+<script src="js/map.js"></script>
+<script src="js/players.js"></script>
+<script src="js/duel.js"></script>
+<script src="js/chat.js"></script>
+<script src="js/ranking.js"></script>
+<script src="js/admin.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
