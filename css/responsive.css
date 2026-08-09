@@ -1,0 +1,62 @@
+/* ============================================================
+   DUEL BOXING — Responsive rules
+   Mobile-first: base styles in style.css already work on mobile.
+   These rules hide/show nav variants and adjust for breakpoints.
+   ============================================================ */
+
+/* ---- Mobile default: hide desktop sidebar & right panel, show bottom nav ---- */
+.sidebar{ display:none; }
+.right-panel{ display:none; }
+.bottom-nav{
+  display:flex; position:fixed; bottom:0; left:0; right:0; z-index:50;
+  /* Same fix as .topbar: fixed + backdrop-filter is the risky combo in some
+     WebViews. Solid opaque background removes the glitch risk. */
+  background: #0a0e1c;
+  border-top: 1px solid var(--border-soft);
+  padding: 8px 6px calc(8px + env(safe-area-inset-bottom));
+  justify-content:space-around;
+}
+.bn-item{
+  display:flex; flex-direction:column; align-items:center; gap:3px;
+  font-size:10.5px; font-weight:700; color: var(--text-faint); letter-spacing:.02em;
+  padding: 6px 10px; border-radius: var(--radius-sm); min-width:56px;
+}
+.bn-item span{ font-size:19px; }
+.bn-item.active{ color: var(--blue); background: var(--blue-dim); }
+
+.mobile-only{ display:inline-flex; }
+.topbar-user-info strong{ font-size:13px; }
+.content{ padding: 16px 14px 96px; }
+
+/* Small phones */
+@media (max-width: 380px){
+  .topbar-stats{ display:none; }
+  .match-found-title{ font-size:32px; }
+}
+
+/* ---- Tablet ---- */
+@media (min-width: 640px){
+  .matches-list{ grid-template-columns: repeat(auto-fill, minmax(280px,1fr)); }
+  .swipe-stage{ max-width:400px; }
+}
+
+/* ---- Desktop / laptop: switch to sidebar layout ---- */
+@media (min-width: 960px){
+  .sidebar{ display:flex; }
+  .right-panel{ display:block; }
+  .bottom-nav{ display:none; }
+  .mobile-only{ display:none; }
+  .content{ padding: 28px 32px 40px; }
+  .view-head h1{ font-size:28px; }
+  .swipe-stage{ max-width:420px; }
+  .app{ align-items:stretch; }
+}
+
+@media (min-width: 1200px){
+  .content{ max-width: 1180px; }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce){
+  *{ animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; }
+}

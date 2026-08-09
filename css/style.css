@@ -1,0 +1,644 @@
+/* ============================================================
+   DUEL BOXING — Core Styles
+   Design tokens: cyber arena / glassmorphism / neon
+   ============================================================ */
+
+:root{
+  --bg: #05070f;
+  --bg-alt: #0a0e1c;
+  --bg-elevated: #0e1324;
+  --glass: rgba(255,255,255,0.045);
+  --glass-strong: rgba(255,255,255,0.08);
+  --border: rgba(255,255,255,0.09);
+  --border-soft: rgba(255,255,255,0.05);
+
+  --blue: #2fd8ff;
+  --blue-dim: rgba(47,216,255,0.16);
+  --purple: #9b6bff;
+  --purple-dim: rgba(155,107,255,0.16);
+  --accent: #ff5d3a;
+  --accent-dim: rgba(255,93,58,0.18);
+  --success: #2bffa0;
+  --success-dim: rgba(43,255,160,0.16);
+  --danger: #ff4d6d;
+
+  --text: #e9edf7;
+  --text-dim: #929ab5;
+  --text-faint: #5c637c;
+
+  --font-display: 'Rajdhani', sans-serif;
+  --font-body: 'Inter', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+
+  --radius-lg: 20px;
+  --radius-md: 14px;
+  --radius-sm: 9px;
+  --radius-pill: 999px;
+
+  --shadow-glow-blue: 0 0 24px rgba(47,216,255,0.25);
+  --shadow-glow-purple: 0 0 24px rgba(155,107,255,0.25);
+  --shadow-card: 0 12px 40px rgba(0,0,0,0.45);
+}
+
+*{ box-sizing: border-box; margin:0; padding:0; }
+
+html,body{ height:100%; }
+body{
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+  /* overflow-x:hidden on <body> is a known trigger for position:sticky to
+     break in some Chromium WebViews (it forces a new scroll container).
+     overflow-x:clip prevents the same horizontal overflow without that
+     side-effect; hidden is kept as a safe fallback for older engines. */
+  overflow-x: hidden;
+  /* Stops scroll "bounce"/chaining from nested scrollable panels (map,
+     modals) from dragging the outer page along with them. */
+  overscroll-behavior-y: contain;
+}
+@supports (overflow-x: clip) {
+  body{ overflow-x: clip; }
+}
+
+.hidden{ display:none !important; }
+
+button{ font-family: inherit; cursor:pointer; border:none; background:none; color: inherit; }
+input{ font-family: inherit; }
+ul,ol{ list-style:none; }
+a{ color:inherit; }
+
+::-webkit-scrollbar{ width:8px; height:8px; }
+::-webkit-scrollbar-thumb{ background: rgba(255,255,255,0.12); border-radius: 10px; }
+::-webkit-scrollbar-track{ background: transparent; }
+
+/* ---------- Glass utility ---------- */
+/* Was a translucent tint + backdrop-filter:blur(18px) (frosted-glass look).
+   backdrop-filter has repeatedly caused rendering glitches in the WebView
+   this was tested in (blank/blurred regions, see project changelog), so this
+   is now a fully opaque solid surface instead — same dark "elevated card"
+   feel, none of the blur-related risk. */
+.glass{
+  background: linear-gradient(180deg, #141a2e, #0f1425);
+  border: 1px solid var(--border);
+}
+
+/* ---------- Buttons ---------- */
+.btn{
+  display:inline-flex; align-items:center; justify-content:center; gap:8px;
+  padding: 12px 20px;
+  border-radius: var(--radius-pill);
+  font-family: var(--font-display);
+  font-weight:700;
+  letter-spacing: 0.04em;
+  font-size: 14px;
+  transition: transform .15s ease, box-shadow .2s ease, opacity .2s ease;
+}
+.btn:active{ transform: scale(0.97); }
+.btn-block{ width:100%; }
+.btn-sm{ padding:8px 14px; font-size:12px; }
+.btn-primary{
+  background: linear-gradient(135deg, var(--blue), var(--purple));
+  color:#04101a;
+  box-shadow: var(--shadow-glow-blue);
+}
+.btn-primary:hover{ box-shadow: 0 0 32px rgba(47,216,255,0.45); }
+.btn-secondary{
+  background: var(--glass-strong);
+  border: 1px solid var(--border);
+  color: var(--text);
+}
+.btn-secondary:hover{ border-color: var(--blue); color: var(--blue); }
+.btn-ghost{ background: transparent; border: 1px solid var(--border-soft); color: var(--text-dim); }
+.btn-ghost:hover{ color: var(--danger); border-color: var(--danger); }
+.btn-danger{ background: var(--danger); color:#1a0509; }
+.btn-success{ background: linear-gradient(135deg, var(--success), #17c98a); color:#04160f; }
+.btn:disabled{ opacity:.4; cursor:not-allowed; transform:none; }
+
+.link-btn{ color: var(--blue); text-decoration: underline; font-weight:600; background:none; padding:0; }
+
+.icon-btn{
+  width:40px; height:40px; border-radius: 50%;
+  display:flex; align-items:center; justify-content:center;
+  background: var(--glass); border:1px solid var(--border);
+  font-size:18px; position:relative;
+}
+
+/* ============================================================
+   AUTH SCREEN
+   ============================================================ */
+.auth-screen{
+  position:relative; min-height:100vh; display:flex; align-items:center; justify-content:center;
+  padding: 24px; overflow:hidden;
+}
+.auth-bg{ position:absolute; inset:0; z-index:0; }
+.grid-lines{
+  position:absolute; inset:0;
+  background-image:
+    linear-gradient(rgba(47,216,255,0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(47,216,255,0.06) 1px, transparent 1px);
+  background-size: 42px 42px;
+  mask-image: radial-gradient(ellipse at center, black 0%, transparent 75%);
+}
+.glow-orb{ position:absolute; border-radius:50%; filter: blur(80px); opacity:.5; }
+.orb-blue{ width:380px; height:380px; background: var(--blue); top:-120px; left:-100px; }
+.orb-purple{ width:420px; height:420px; background: var(--purple); bottom:-160px; right:-120px; }
+
+.auth-card{
+  position:relative; z-index:1;
+  width:100%; max-width: 420px;
+  border-radius: var(--radius-lg);
+  padding: 32px 28px;
+  animation: floatIn .5s ease;
+}
+.auth-logo{ display:flex; align-items:center; gap:10px; font-family: var(--font-display); font-size:20px; letter-spacing:.06em; }
+.auth-logo b{ color: var(--blue); }
+.auth-tagline{ color: var(--text-dim); font-size:13.5px; margin: 10px 0 22px; }
+
+.auth-tabs{ display:flex; background: var(--glass); border-radius: var(--radius-pill); padding:4px; margin-bottom:20px; border:1px solid var(--border-soft); }
+.auth-tab{ flex:1; padding:10px; border-radius: var(--radius-pill); font-family: var(--font-display); font-weight:700; letter-spacing:.04em; color: var(--text-dim); font-size:13px; }
+.auth-tab.active{ background: linear-gradient(135deg, var(--blue-dim), var(--purple-dim)); color: var(--text); box-shadow: inset 0 0 0 1px rgba(255,255,255,0.1); }
+
+.auth-form{ display:flex; flex-direction:column; gap:14px; }
+.auth-form label{ display:flex; flex-direction:column; gap:6px; font-size:12.5px; color: var(--text-dim); font-weight:600; }
+.auth-form input{
+  background: var(--bg-alt); border:1px solid var(--border); color: var(--text);
+  padding: 12px 14px; border-radius: var(--radius-sm); font-size:14px; outline:none;
+  transition: border-color .15s ease, box-shadow .15s ease;
+}
+.auth-form input:focus{ border-color: var(--blue); box-shadow: 0 0 0 3px var(--blue-dim); }
+.checkbox-row{ flex-direction:row !important; align-items:center; gap:8px !important; }
+.checkbox-row input{ width:16px; height:16px; accent-color: var(--blue); }
+.auth-hint{ font-size:12px; color: var(--text-faint); text-align:center; margin-top:4px; }
+.auth-error{ color: var(--danger); font-size:12.5px; margin-top:12px; text-align:center; min-height:16px; }
+
+/* ============================================================
+   APP SHELL
+   ============================================================ */
+.app{ display:flex; min-height:100vh; }
+
+.sidebar{
+  width: 236px; flex-shrink:0; display:flex; flex-direction:column; gap:22px;
+  padding: 22px 16px; border-right:1px solid var(--border-soft);
+  background: var(--bg-alt);
+}
+.sidebar-logo{ display:flex; align-items:center; gap:9px; font-family: var(--font-display); font-size:16px; letter-spacing:.05em; padding: 0 6px; }
+.sidebar-logo b{ color: var(--blue); }
+.sidebar-nav{ display:flex; flex-direction:column; gap:4px; flex:1; }
+.nav-item{
+  display:flex; align-items:center; gap:12px; padding: 11px 12px; border-radius: var(--radius-sm);
+  color: var(--text-dim); font-weight:600; font-size:14px; text-align:left; transition: all .15s ease;
+}
+.nav-ico{ font-size:17px; width:20px; text-align:center; }
+.nav-item:hover{ background: var(--glass); color: var(--text); }
+.nav-item.active{ background: linear-gradient(135deg, var(--blue-dim), var(--purple-dim)); color: var(--text); box-shadow: inset 0 0 0 1px var(--border); }
+
+.main-col{ flex:1; min-width:0; display:flex; flex-direction:column; }
+
+.topbar{
+  display:flex; align-items:center; gap:14px; padding: 14px 22px;
+  border-bottom: 1px solid var(--border-soft); position:sticky; top:0;
+  /* Was rgba(...)+backdrop-filter: blur(). That combo (sticky + backdrop-filter)
+     is a known trigger for blank/black rendering glitches during scroll in a
+     number of Android WebViews — the exact symptom seen in testing (header
+     area going blank after interacting with the map). Switched to a fully
+     opaque solid background instead — visually still reads as a dark bar,
+     but removes the risky blur-on-scroll combination entirely. */
+  background: #090c17;
+  z-index: 40;
+}
+.topbar-user{ display:flex; align-items:center; gap:10px; }
+.avatar-ring{
+  width:38px; height:38px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+  font-family: var(--font-display); font-weight:700; font-size:15px;
+  background: linear-gradient(135deg, var(--blue-dim), var(--purple-dim));
+  border: 2px solid var(--blue); box-shadow: 0 0 10px rgba(47,216,255,0.4);
+  color: var(--blue);
+}
+.avatar-ring.sm{ width:34px; height:34px; font-size:13px; }
+.avatar-ring.lg{ width:76px; height:76px; font-size:26px; border-width:3px; }
+.topbar-user-info{ display:flex; flex-direction:column; line-height:1.2; }
+.topbar-user-info strong{ font-family: var(--font-display); font-size:14px; letter-spacing:.03em; }
+.status-dot{ width:8px; height:8px; border-radius:50%; background: var(--text-faint); display:inline-block; margin-top:3px; }
+.status-dot.online{ background: var(--success); box-shadow: 0 0 6px var(--success); }
+.status-dot.away{ background: #ffcf4d; box-shadow: 0 0 6px #ffcf4d; }
+.status-dot.offline{ background: var(--text-faint); }
+
+.topbar-stats{ display:flex; gap:8px; margin-left:auto; }
+.stat-chip{
+  display:flex; flex-direction:column; align-items:center; gap:1px;
+  background: var(--glass); border:1px solid var(--border-soft); border-radius: var(--radius-sm);
+  padding: 5px 12px; font-family: var(--font-mono); font-weight:700; font-size:13px;
+}
+.stat-label{ font-family: var(--font-body); font-weight:700; font-size:9px; color: var(--text-faint); letter-spacing:.08em; }
+
+.notif-dot{ position:absolute; top:6px; right:7px; width:8px; height:8px; border-radius:50%; background: var(--accent); box-shadow: 0 0 6px var(--accent); }
+
+.content{ flex:1; padding: 20px 24px 90px; max-width: 1100px; width:100%; margin:0 auto; }
+
+.view{ display:none; animation: fadeUp .35s ease; }
+.view.active{ display:block; }
+
+.view-head{ display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; }
+.view-head h1{ font-family: var(--font-display); font-size: 24px; letter-spacing:.02em; }
+
+.right-panel{
+  width: 300px; flex-shrink:0; padding: 22px 18px; border-left: 1px solid var(--border-soft);
+  background: var(--bg-alt);
+}
+.right-panel h3{ font-family: var(--font-display); font-size:15px; letter-spacing:.04em; margin-bottom:14px; color: var(--text-dim); }
+.right-panel-empty{ color: var(--text-faint); font-size:13px; }
+
+/* ---------- Bottom nav (mobile) ---------- */
+.bottom-nav{ display:none; }
+
+/* ============================================================
+   MAP
+   ============================================================ */
+.map-search input{
+  width:100%; background: var(--glass); border:1px solid var(--border); color: var(--text);
+  padding: 12px 16px; border-radius: var(--radius-pill); font-size:14px; outline:none; margin-bottom:12px;
+}
+.map-search input:focus{ border-color: var(--blue); }
+.activity-ticker{
+  display:flex; align-items:center; gap:8px;
+  background: var(--glass); border:1px solid var(--border-soft); border-radius: var(--radius-pill);
+  padding: 8px 14px; margin-bottom:12px; font-size:12px; color: var(--text-dim);
+  overflow:hidden; white-space:nowrap; text-overflow:ellipsis;
+}
+.activity-ticker #activity-ticker-text{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; animation: fadeUp .3s ease; }
+.live-dot{ width:7px; height:7px; border-radius:50%; background: var(--danger); flex-shrink:0; box-shadow: 0 0 6px var(--danger); animation: pulseScale 1.4s ease infinite; }
+.leaflet-map{
+  width:100%; height: 62vh; height: 62dvh; min-height:380px; border-radius: var(--radius-lg);
+  overflow:hidden; border:1px solid var(--border); box-shadow: var(--shadow-card);
+  /* Stops a finger-drag on the map from also scrolling the page behind it —
+     without this, panning the map near its edge could visually "drag" the
+     whole layout and leave the header scrolled out of view. */
+  overscroll-behavior: contain;
+  touch-action: pan-x pan-y;
+  /* Leaflet positions markers/popups with CSS transforms for performance,
+     which can get GPU-layer-promoted and, in some WebViews, visually escape
+     normal z-index stacking — markers/popups were observed rendering ABOVE
+     our modals despite the modal's higher z-index. isolation:isolate forces
+     a real stacking-context boundary so nothing inside this container can
+     ever paint above page-level UI (modals, topbar, etc.) again. */
+  isolation: isolate;
+  position: relative;
+  z-index: 1;
+}
+.map-empty{
+  text-align:center; padding: 30px 16px; color: var(--text-dim); display:flex; flex-direction:column; gap:12px; align-items:center;
+}
+
+/* Leaflet marker custom */
+.player-marker{
+  width:44px; height:44px; border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  background: radial-gradient(circle at 35% 28%, var(--blue-dim), var(--bg-elevated) 72%);
+  border: 2.5px solid var(--blue);
+  font-family: var(--font-display); font-weight:700; font-size:15px; color: var(--blue);
+  text-shadow: 0 0 8px rgba(47,216,255,0.6);
+  box-shadow: 0 0 14px rgba(47,216,255,0.6), 0 4px 10px rgba(0,0,0,0.5);
+  position:relative;
+}
+.player-marker.away{ border-color:#ffcf4d; color:#ffcf4d; text-shadow:0 0 8px rgba(255,207,77,0.55); box-shadow: 0 0 14px rgba(255,207,77,0.5), 0 4px 10px rgba(0,0,0,0.5); background: radial-gradient(circle at 35% 28%, rgba(255,207,77,0.16), var(--bg-elevated) 72%); }
+.player-marker.offline{ border-color: var(--text-faint); color: var(--text-faint); text-shadow:none; box-shadow:none; opacity:.55; background: var(--bg-elevated); }
+.marker-chat-bubble{
+  position:absolute; top:-16px; right:-8px; font-size:14px; line-height:1;
+  background: var(--bg-elevated); border:1px solid var(--blue); border-radius:50%;
+  width:24px; height:24px; display:flex; align-items:center; justify-content:center;
+  box-shadow: 0 0 10px rgba(47,216,255,0.6);
+  animation: popIn .25s ease, pulseScale 1s ease infinite;
+}
+.player-marker::after{
+  content:''; position:absolute; inset:-6px; border-radius:50%; border:1.5px solid var(--blue); opacity:.6;
+  animation: pulseRing 2.2s ease-out infinite;
+}
+.you-marker{
+  width:20px; height:20px; border-radius:50%; background: var(--purple);
+  border:3px solid #fff; box-shadow: 0 0 16px rgba(155,107,255,0.9);
+}
+
+.player-popup{ font-family: var(--font-body); min-width:190px; padding:2px; }
+.player-popup .pp-name{ font-family: var(--font-display); font-weight:700; font-size:15px; }
+.player-popup .pp-meta{ font-size:12px; color: var(--text-dim); margin: 3px 0 8px; }
+.player-popup .pp-stats{ display:flex; gap:10px; font-family: var(--font-mono); font-size:11.5px; margin-bottom:10px; }
+.leaflet-popup-content-wrapper{ background: var(--bg-elevated); color: var(--text); border-radius: var(--radius-md); border:1px solid var(--border); }
+.leaflet-popup-tip{ background: var(--bg-elevated); }
+.leaflet-popup-content{ margin:12px 14px; }
+.leaflet-popup-close-button{
+  color: var(--text-dim) !important;
+  font-size: 20px !important;
+  top: 8px !important; right: 8px !important;
+  transition: color .15s ease;
+}
+.leaflet-popup-close-button:hover{ color: var(--blue) !important; }
+
+/* Leaflet ships light-mode controls (white squares, plain attribution box)
+   by default — restyle them to match the dark/neon theme instead of leaving
+   Leaflet's stock look bolted onto our UI. */
+.leaflet-bar{
+  border: 1px solid var(--border) !important;
+  border-radius: var(--radius-sm) !important;
+  overflow: hidden;
+  box-shadow: var(--shadow-card) !important;
+}
+.leaflet-bar a, .leaflet-bar a:hover{
+  background: var(--bg-elevated) !important;
+  color: var(--blue) !important;
+  border-bottom: 1px solid var(--border-soft) !important;
+  width: 34px !important; height: 34px !important; line-height: 34px !important;
+  font-size: 17px !important;
+}
+.leaflet-bar a:last-child{ border-bottom: none !important; }
+.leaflet-bar a:hover{ background: var(--blue-dim) !important; color: var(--text) !important; }
+.leaflet-control-attribution{
+  background: rgba(5,7,15,0.85) !important;
+  color: var(--text-faint) !important;
+  font-size: 10px !important;
+  padding: 2px 8px !important;
+  border-radius: 8px 0 0 0 !important;
+}
+.leaflet-control-attribution a{ color: var(--text-dim) !important; }
+
+/* ============================================================
+   PLAYER CARD (shared: swipe + lists)
+   ============================================================ */
+.player-photo{
+  width:100%; aspect-ratio:1/1; border-radius: var(--radius-md);
+  display:flex; align-items:center; justify-content:center;
+  font-family: var(--font-display); font-weight:700; font-size: 64px;
+  background: radial-gradient(circle at 30% 20%, var(--blue-dim), transparent 60%), var(--bg-elevated);
+  border: 1px solid var(--border); color: var(--blue); position:relative; overflow:hidden;
+}
+.player-photo::before{
+  content:''; position:absolute; inset:0;
+  background: linear-gradient(160deg, transparent 40%, rgba(155,107,255,0.18));
+}
+
+/* ============================================================
+   SWIPE / FIND OPPONENT
+   ============================================================ */
+.swipe-stage{ position:relative; height: 62vh; height: 62dvh; min-height:440px; max-width:380px; margin: 6px auto 20px; overscroll-behavior: contain; }
+.swipe-card{
+  position:absolute; inset:0; border-radius: var(--radius-lg);
+  background: var(--bg-elevated); border:1px solid var(--border); box-shadow: var(--shadow-card);
+  display:flex; flex-direction:column; padding:16px; touch-action: none; user-select:none;
+  transition: transform .3s ease, opacity .3s ease;
+}
+.swipe-card .player-photo{ flex:1; font-size:88px; margin-bottom:14px; }
+.swipe-card .sc-name{ font-family: var(--font-display); font-size:22px; font-weight:700; }
+.swipe-card .sc-sub{ display:flex; gap:10px; align-items:center; color: var(--text-dim); font-size:13px; margin:4px 0 8px; font-family: var(--font-mono); }
+.swipe-card .sc-style{ display:inline-block; background: var(--purple-dim); color: var(--purple); border-radius: var(--radius-pill); padding: 4px 12px; font-size:12px; font-weight:700; width:fit-content; }
+.swipe-card .sc-badge{ position:absolute; top:20px; padding: 6px 16px; border-radius: 8px; font-family: var(--font-display); font-weight:700; letter-spacing:.06em; font-size:16px; border:3px solid; opacity:0; transition: opacity .15s ease; transform: rotate(-12deg); }
+.swipe-card .sc-badge.pass{ left:20px; border-color: var(--danger); color: var(--danger); }
+.swipe-card .sc-badge.like{ right:20px; border-color: var(--success); color: var(--success); transform: rotate(12deg); }
+
+.swipe-actions{ display:flex; justify-content:center; gap:26px; margin-bottom: 8px; }
+.swipe-btn{
+  width:62px; height:62px; border-radius:50%; font-size:24px; display:flex; align-items:center; justify-content:center;
+  background: var(--bg-elevated); border:1px solid var(--border); box-shadow: var(--shadow-card);
+  transition: transform .15s ease;
+}
+.swipe-btn:active{ transform: scale(0.9); }
+.swipe-btn.pass{ color: var(--danger); border-color: rgba(255,77,109,0.4); }
+.swipe-btn.like{ color: var(--success); border-color: rgba(43,255,160,0.4); font-size:26px; }
+.swipe-empty, .empty-state{ text-align:center; padding: 50px 20px; color: var(--text-dim); }
+
+/* ============================================================
+   MATCHES LIST
+   ============================================================ */
+.matches-list{ display:grid; grid-template-columns: repeat(auto-fill, minmax(260px,1fr)); gap:14px; }
+.match-card{
+  background: var(--glass); border:1px solid var(--border); border-radius: var(--radius-md); padding:16px;
+  display:flex; flex-direction:column; gap:10px; transition: border-color .15s ease;
+}
+.match-card:hover{ border-color: var(--blue); }
+.match-card-top{ display:flex; align-items:center; gap:12px; }
+.match-card-name{ font-family: var(--font-display); font-weight:700; font-size:16px; }
+.match-card-meta{ font-size:12px; color: var(--text-dim); }
+.match-card-actions{ display:flex; gap:8px; margin-top:4px; }
+.match-status{ font-size:11px; font-weight:700; padding:3px 10px; border-radius: var(--radius-pill); text-transform:uppercase; letter-spacing:.04em; }
+.match-status.pending{ background: var(--accent-dim); color: var(--accent); }
+.match-status.active{ background: var(--success-dim); color: var(--success); }
+
+/* ============================================================
+   MATCH FOUND OVERLAY
+   ============================================================ */
+.match-found-card{ text-align:center; color:#fff; z-index:2; position:relative; padding: 20px; }
+/* Bug fix: this used to set color:transparent unconditionally alongside the
+   gradient-clip trick. If -webkit-background-clip:text isn't fully supported
+   (some embedded/older WebViews), the gradient never paints but the text
+   still stays transparent — i.e. the headline silently disappears. Now the
+   solid fallback color always applies, and the gradient only replaces it
+   when the browser actually supports background-clip:text. */
+.match-found-title{
+  font-family: var(--font-display); font-size: 42px; color: var(--blue);
+  animation: pulseScale 1s ease infinite;
+}
+@supports ((-webkit-background-clip: text) or (background-clip: text)){
+  .match-found-title{
+    background: linear-gradient(135deg, var(--blue), var(--purple));
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+}
+.match-found-sub{ font-family: var(--font-mono); letter-spacing:.15em; color: var(--text-dim); margin-bottom:26px; font-size:13px;}
+.match-found-avatars{ display:flex; align-items:center; justify-content:center; gap:20px; margin-bottom:30px; }
+.match-found-avatars .avatar-ring{ width:88px; height:88px; font-size:32px; }
+.match-found-vs{ font-family: var(--font-display); font-size:20px; color: var(--accent); }
+.match-found-actions{ display:flex; gap:12px; justify-content:center; }
+
+/* ============================================================
+   MODALS (player / challenge / incoming / filters)
+   ============================================================ */
+.modal-backdrop{
+  /* backdrop-filter removed for the same reliability reason as .glass above —
+     compensated with higher opacity so the modal still reads clearly against
+     busy content (like the map) behind it. */
+  position:fixed; inset:0; background: rgba(3,4,10,0.9);
+  display:flex; align-items:center; justify-content:center; z-index:100; padding:16px;
+}
+.modal{
+  width:100%; max-width: 420px; border-radius: var(--radius-lg); padding:24px;
+  max-height: 88vh; overflow-y:auto; box-shadow: var(--shadow-card);
+}
+.modal h2{ font-family: var(--font-display); font-size:20px; margin-bottom:4px; }
+.modal-close{ position:absolute; top:16px; right:16px; }
+
+.profile-modal-head{ display:flex; align-items:center; gap:14px; margin-bottom:14px; }
+.profile-modal-stats{ display:flex; gap:10px; margin: 14px 0; }
+.pm-stat{ flex:1; text-align:center; background: var(--glass); border-radius: var(--radius-sm); padding:10px 6px; }
+.pm-stat b{ display:block; font-family: var(--font-mono); font-size:16px; }
+.pm-stat span{ font-size:10px; color: var(--text-faint); text-transform:uppercase; letter-spacing:.05em; }
+.modal-actions{ display:flex; gap:10px; margin-top: 18px; }
+
+.notice-box{
+  background: var(--accent-dim); border:1px solid rgba(255,93,58,0.35); color:#ffb59c;
+  border-radius: var(--radius-sm); padding: 12px 14px; font-size:12.5px; margin: 14px 0; line-height:1.5;
+}
+
+.option-group{ display:flex; flex-direction:column; gap:8px; margin: 10px 0 16px; }
+.option-row{
+  display:flex; align-items:center; gap:10px; padding:11px 14px; border-radius: var(--radius-sm);
+  background: var(--glass); border: 1px solid var(--border-soft); font-size:14px; font-weight:600;
+  transition: all .15s ease;
+}
+.option-row input{ accent-color: var(--blue); width:16px; height:16px; }
+.option-row.selected{ border-color: var(--blue); background: var(--blue-dim); }
+.option-group-label{ font-size:12px; font-weight:700; color: var(--text-dim); text-transform:uppercase; letter-spacing:.05em; margin-top:8px; }
+
+/* ============================================================
+   DUEL ROOM
+   ============================================================ */
+.duelroom{
+  width:100%; max-width:640px; background: var(--bg-elevated); border:1px solid var(--border);
+  border-radius: var(--radius-lg); padding: 24px; box-shadow: var(--shadow-card); max-height:92vh; overflow-y:auto;
+}
+.dr-mode-badge{ display:block; text-align:center; font-family: var(--font-mono); font-size:11px; letter-spacing:.15em; color: var(--purple); margin-bottom:14px; }
+.dr-vs-row{ display:flex; align-items:center; justify-content:space-between; margin-bottom:18px; gap:10px; }
+.dr-player{ flex:1; text-align:center; }
+.dr-player .avatar-ring{ margin: 0 auto 8px; width:64px; height:64px; font-size:24px; }
+.dr-player-name{ font-family: var(--font-display); font-weight:700; font-size:15px; }
+.dr-vs-mid{ font-family: var(--font-display); font-size:18px; color: var(--accent); flex-shrink:0; }
+.dr-timer{ text-align:center; font-family: var(--font-mono); font-size:38px; font-weight:700; letter-spacing:.05em; margin: 4px 0 6px; color: var(--blue); text-shadow: 0 0 20px rgba(47,216,255,0.5); }
+.dr-round{ text-align:center; font-size:12px; color: var(--text-dim); font-family: var(--font-mono); letter-spacing:.1em; margin-bottom:16px; }
+.dr-bars{ display:flex; gap:16px; margin-bottom:18px; }
+.dr-bar-col{ flex:1; }
+.dr-bar-label{ display:flex; justify-content:space-between; font-family: var(--font-mono); font-size:12px; margin-bottom:5px; }
+.dr-bar-track{ height:10px; border-radius: var(--radius-pill); background: rgba(255,255,255,0.06); overflow:hidden; }
+.dr-bar-fill{ height:100%; border-radius: var(--radius-pill); transition: width .4s ease; }
+.dr-bar-fill.blue{ background: linear-gradient(90deg, var(--blue), var(--purple)); }
+.dr-bar-fill.orange{ background: linear-gradient(90deg, var(--accent), #ffb15c); }
+.dr-score-buttons{ display:grid; grid-template-columns: repeat(2,1fr); gap:10px; margin-bottom:18px; }
+.dr-score-buttons button{
+  background: var(--glass); border:1px solid var(--border); border-radius: var(--radius-sm);
+  padding: 12px; font-family: var(--font-display); font-weight:700; font-size:13px; letter-spacing:.03em;
+  display:flex; flex-direction:column; gap:2px; align-items:center;
+}
+.dr-score-buttons button:hover{ border-color: var(--blue); color: var(--blue); }
+.dr-score-buttons small{ font-family: var(--font-body); font-weight:400; color: var(--text-faint); font-size:10px; }
+.dr-controls{ display:flex; gap:10px; }
+.dr-result{ text-align:center; padding: 10px 0; }
+.dr-result .trophy{ font-size:46px; }
+.dr-result h2{ font-family: var(--font-display); font-size:22px; margin: 8px 0 2px; }
+.dr-result .winner-name{ color: var(--blue); font-size:26px; font-family: var(--font-display); font-weight:700; margin-bottom:10px; }
+.dr-result .final-score{ font-family: var(--font-mono); font-size:20px; margin-bottom:6px; }
+.dr-result .rating-change{ font-family: var(--font-mono); font-weight:700; font-size:16px; margin-bottom:18px; }
+.dr-result .rating-change.up{ color: var(--success); }
+.dr-result .rating-change.down{ color: var(--danger); }
+
+/* ============================================================
+   CHAT
+   ============================================================ */
+.chat-panel{ width:100%; max-width:420px; height:78vh; max-height:640px; border-radius: var(--radius-lg); display:flex; flex-direction:column; overflow:hidden; }
+.chat-head{ display:flex; align-items:center; gap:10px; padding: 16px; border-bottom:1px solid var(--border-soft); }
+.chat-head-name{ font-family: var(--font-display); font-weight:700; }
+.chat-head-actions{ margin-left:auto; display:flex; gap:6px; }
+.chat-messages{ flex:1; overflow-y:auto; padding: 14px; display:flex; flex-direction:column; gap:8px; }
+.chat-msg{ max-width:75%; padding: 9px 13px; border-radius: 14px; font-size:13.5px; line-height:1.4; }
+.chat-msg.me{ align-self:flex-end; background: linear-gradient(135deg, var(--blue-dim), var(--purple-dim)); border: 1px solid var(--border); border-bottom-right-radius:4px; }
+.chat-msg.them{ align-self:flex-start; background: var(--glass); border:1px solid var(--border-soft); border-bottom-left-radius:4px; }
+.chat-msg.typing{ display:flex; gap:4px; align-items:center; padding:12px 14px; }
+.typing-dot{ width:6px; height:6px; border-radius:50%; background: var(--text-dim); animation: typingBounce 1.1s ease infinite; }
+.typing-dot:nth-child(2){ animation-delay:.15s; }
+.typing-dot:nth-child(3){ animation-delay:.3s; }
+.chat-input-row{ display:flex; gap:8px; padding: 12px; border-top:1px solid var(--border-soft); }
+.chat-input-row input{ flex:1; background: var(--bg-alt); border:1px solid var(--border); color: var(--text); padding:11px 14px; border-radius: var(--radius-pill); outline:none; font-size:14px; }
+.chat-input-row input:focus{ border-color: var(--blue); }
+.chat-send{ width:42px; height:42px; border-radius:50%; background: linear-gradient(135deg, var(--blue), var(--purple)); color:#04101a; font-size:16px; }
+
+/* ============================================================
+   NOTIFICATIONS
+   ============================================================ */
+.notif-panel{ width:100%; max-width:380px; max-height:70vh; overflow-y:auto; border-radius: var(--radius-lg); padding:18px; }
+.notif-item{ display:flex; gap:10px; padding: 12px 8px; border-bottom:1px solid var(--border-soft); font-size:13.5px; }
+.notif-item:last-child{ border-bottom:none; }
+.notif-time{ font-size:11px; color: var(--text-faint); margin-top:2px; }
+.notif-empty{ text-align:center; color: var(--text-faint); padding: 30px 0; }
+
+/* ============================================================
+   RANKING
+   ============================================================ */
+.rank-filters{ display:flex; gap:8px; margin-bottom:16px; flex-wrap:wrap; }
+.chip{ padding: 8px 16px; border-radius: var(--radius-pill); background: var(--glass); border:1px solid var(--border-soft); font-size:12px; font-weight:700; letter-spacing:.03em; color: var(--text-dim); }
+.chip.active{ background: linear-gradient(135deg, var(--blue-dim), var(--purple-dim)); color: var(--text); border-color: var(--border); }
+.rank-list{ display:flex; flex-direction:column; gap:8px; }
+.rank-row{ display:flex; align-items:center; gap:14px; padding: 12px 16px; border-radius: var(--radius-md); background: var(--glass); border:1px solid var(--border-soft); }
+.rank-row.me{ border-color: var(--blue); background: var(--blue-dim); }
+.rank-pos{ font-family: var(--font-mono); font-weight:700; width:28px; text-align:center; color: var(--text-dim); }
+.rank-row:nth-child(1) .rank-pos{ color:#ffd35c; }
+.rank-row:nth-child(2) .rank-pos{ color:#c9d3e0; }
+.rank-row:nth-child(3) .rank-pos{ color:#e0a06b; }
+.rank-name{ font-family: var(--font-display); font-weight:700; flex:1; }
+.rank-rating{ font-family: var(--font-mono); font-weight:700; color: var(--blue); }
+
+/* ============================================================
+   TOURNAMENT
+   ============================================================ */
+.tournament-hero{
+  border-radius: var(--radius-lg); padding: 22px; background: linear-gradient(135deg, var(--blue-dim), var(--purple-dim));
+  border:1px solid var(--border); margin-bottom:20px; position:relative; overflow:hidden;
+}
+.tournament-hero h2{ font-family: var(--font-display); font-size:22px; margin-bottom:8px; }
+.tournament-meta{ display:flex; gap:16px; flex-wrap:wrap; font-family: var(--font-mono); font-size:12.5px; color: var(--text-dim); margin-bottom:16px; }
+.bracket{ overflow-x:auto; display:flex; gap:36px; padding: 10px 4px 20px; }
+.bracket-round{ display:flex; flex-direction:column; justify-content:space-around; gap:20px; min-width:170px; }
+.bracket-round-title{ text-align:center; font-family: var(--font-mono); font-size:11px; color: var(--text-faint); letter-spacing:.1em; margin-bottom:6px; }
+.bracket-match{ background: var(--glass); border:1px solid var(--border-soft); border-radius: var(--radius-sm); padding:8px 10px; font-size:12.5px; }
+.bracket-slot{ display:flex; justify-content:space-between; padding:4px 0; }
+.bracket-slot.winner{ color: var(--success); font-weight:700; }
+.bracket-slot.tbd{ color: var(--text-faint); }
+
+/* ============================================================
+   PROFILE
+   ============================================================ */
+.profile-head{ display:flex; align-items:center; gap:18px; margin-bottom:20px; flex-wrap:wrap; }
+.profile-head-info h2{ font-family: var(--font-display); font-size:22px; }
+.profile-head-info p{ color: var(--text-dim); font-size:13px; margin-top:2px; }
+.profile-stats-grid{ display:grid; grid-template-columns: repeat(auto-fit, minmax(110px,1fr)); gap:10px; margin-bottom:20px; }
+.profile-stat{ background: var(--glass); border:1px solid var(--border-soft); border-radius: var(--radius-md); padding:14px; text-align:center; }
+.profile-stat b{ display:block; font-family: var(--font-mono); font-size:20px; }
+.profile-stat span{ font-size:10.5px; color: var(--text-faint); text-transform:uppercase; letter-spacing:.05em; }
+.xp-bar-wrap{ margin-bottom:20px; }
+.xp-bar-track{ height:14px; border-radius: var(--radius-pill); background: rgba(255,255,255,0.06); overflow:hidden; border:1px solid var(--border-soft); }
+.xp-bar-fill{ height:100%; background: linear-gradient(90deg, var(--blue), var(--purple)); border-radius: var(--radius-pill); }
+.xp-bar-label{ display:flex; justify-content:space-between; font-family: var(--font-mono); font-size:12px; margin-bottom:6px; color: var(--text-dim); }
+.achievements-row{ display:flex; gap:10px; flex-wrap:wrap; margin-bottom:20px; }
+.achievement-chip{ display:flex; align-items:center; gap:6px; background: var(--glass); border:1px solid var(--border-soft); padding:8px 14px; border-radius: var(--radius-pill); font-size:12.5px; font-weight:600; }
+.history-table{ width:100%; border-collapse:collapse; font-size:13px; }
+.history-table th{ text-align:left; color: var(--text-faint); font-weight:600; font-size:11px; text-transform:uppercase; letter-spacing:.04em; padding: 8px 10px; border-bottom:1px solid var(--border-soft); }
+.history-table td{ padding: 10px; border-bottom:1px solid var(--border-soft); }
+.history-table .win{ color: var(--success); font-weight:700; }
+.history-table .loss{ color: var(--danger); font-weight:700; }
+.profile-section{ margin-bottom:24px; }
+.profile-section h3{ font-family: var(--font-display); font-size:15px; margin-bottom:10px; color: var(--text-dim); letter-spacing:.03em; }
+.profile-actions{ display:flex; gap:10px; flex-wrap:wrap; margin-top:10px; }
+
+.edit-profile-form{ display:flex; flex-direction:column; gap:12px; max-width:340px; }
+.edit-profile-form label{ display:flex; flex-direction:column; gap:6px; font-size:12px; color: var(--text-dim); font-weight:600; }
+.edit-profile-form input, .edit-profile-form select{ background: var(--bg-alt); border:1px solid var(--border); color: var(--text); padding:10px 12px; border-radius: var(--radius-sm); outline:none; }
+
+.blocked-list-item{ display:flex; align-items:center; justify-content:space-between; padding:10px 0; border-bottom:1px solid var(--border-soft); }
+
+/* ============================================================
+   ADMIN
+   ============================================================ */
+.admin-stats-grid{ display:grid; grid-template-columns: repeat(auto-fit, minmax(140px,1fr)); gap:12px; margin-bottom:22px; }
+.admin-stat{ background: var(--glass); border:1px solid var(--border-soft); border-radius: var(--radius-md); padding:16px; }
+.admin-stat b{ display:block; font-family: var(--font-mono); font-size:24px; }
+.admin-stat span{ font-size:11px; color: var(--text-faint); text-transform:uppercase; letter-spacing:.04em; }
+.admin-table{ width:100%; border-collapse:collapse; font-size:13px; margin-bottom: 24px; }
+.admin-table th{ text-align:left; color: var(--text-faint); font-weight:600; font-size:11px; text-transform:uppercase; padding:8px 10px; border-bottom:1px solid var(--border-soft); }
+.admin-table td{ padding:10px; border-bottom:1px solid var(--border-soft); vertical-align:middle; }
+.admin-table .btn{ padding:6px 12px; font-size:11px; }
+.admin-tabs{ display:flex; gap:8px; margin-bottom:18px; flex-wrap:wrap; }
+
+/* ============================================================
+   TOAST
+   ============================================================ */
+.toast-container{ position:fixed; top:16px; left:50%; transform:translateX(-50%); z-index:200; display:flex; flex-direction:column; gap:8px; align-items:center; width:100%; padding: 0 16px; pointer-events:none; }
+.toast{
+  background: var(--bg-elevated); border:1px solid var(--border); color: var(--text);
+  padding: 12px 20px; border-radius: var(--radius-pill); font-size:13.5px; font-weight:600;
+  box-shadow: var(--shadow-card); animation: toastIn .25s ease, toastOut .25s ease 2.6s forwards;
+}
