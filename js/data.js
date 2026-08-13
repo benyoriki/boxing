@@ -30,6 +30,24 @@ function escapeHtml(str) {
   return div.innerHTML;
 }
 
+/* ---------- fail-safe avatar renderer ----------
+   Every avatar in the app is rendered through this single function
+   instead of calling `Avatars.svg()` directly. If js/avatars.js ever
+   fails to load (missing file, load-order issue, etc.), this quietly
+   falls back to the old plain-letter avatar instead of throwing —
+   so a problem with ONE decorative feature can never freeze the
+   entire app (buttons, map, navigation) the way a raw crash would. */
+function avatarHtml(username) {
+  try {
+    if (typeof Avatars !== 'undefined' && Avatars && typeof Avatars.svg === 'function') {
+      return Avatars.svg(username);
+    }
+  } catch (e) {
+    console.warn('avatarHtml: falling back to letter avatar —', e);
+  }
+  return escapeHtml((String(username || '?').trim()[0] || '?').toUpperCase());
+}
+
 /* ---------- username validation for registration ---------- */
 function isValidUsername(name) {
   return /^[A-Za-z0-9_]{3,16}$/.test(name);

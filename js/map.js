@@ -100,7 +100,7 @@ const MapModule = (() => {
       const isChatting = p.username === chattingUsername;
       const icon = L.divIcon({
         className: '',
-        html: `<div class="player-marker ${statusClass}">${p.username[0]}${isChatting ? '<span class="marker-chat-bubble">💬</span>' : ''}</div>`,
+        html: `<div class="player-marker ${statusClass}"><span class="marker-avatar-clip">${avatarHtml(p.username)}</span>${isChatting ? '<span class="marker-chat-bubble">💬</span>' : ''}</div>`,
         iconSize: [44, 44],
       });
       const marker = L.marker([p.lat, p.lng], { icon, zIndexOffset: isChatting ? 500 : 0 }).addTo(map);

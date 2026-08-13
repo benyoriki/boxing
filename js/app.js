@@ -18,7 +18,7 @@ const ProfileModule = (() => {
 
     panel.innerHTML = `
       <div class="profile-head">
-        <div class="avatar-ring lg">${escapeHtml(me.username[0])}</div>
+        <div class="avatar-ring lg">${avatarHtml(me.username)}</div>
         <div class="profile-head-info">
           <h2>${escapeHtml(me.username)}</h2>
           <p>Level ${me.level} · ${escapeHtml(me.style || 'Belum dipilih')} · <span class="status-dot ${me.status}"></span> ${me.status === 'online' ? 'Online' : me.status === 'away' ? 'Away' : 'Offline'}</p>
@@ -41,7 +41,7 @@ const ProfileModule = (() => {
       <div class="profile-section">
         <h3>Achievements</h3>
         <div class="achievements-row">
-          ${(me.achievements && me.achievements.length) ? me.achievements.map(a => `<span class="achievement-chip">🏆 ${escapeHtml(a)}</span>`).join('') : `<span style="color:var(--text-faint);font-size:13px;">Belum ada achievement. Menangkan duel untuk membuka achievement!</span>`}
+          ${(me.achievements && me.achievements.length) ? me.achievements.map(a => `<span class="achievement-chip">🏆 ${escapeHtml(a)}</span>`).join('') : `<div class="achievements-empty" style="width:100%;">Belum ada achievement.<br>Menangkan duel untuk membuka achievement!</div>`}
         </div>
       </div>
 
@@ -267,7 +267,7 @@ const AppModule = (() => {
   function refreshTopbar() {
     const me = getCurrentUser();
     if (!me) return;
-    document.getElementById('topbar-avatar').textContent = me.username[0];
+    document.getElementById('topbar-avatar').innerHTML = avatarHtml(me.username);
     document.getElementById('topbar-username').textContent = me.username;
     document.getElementById('topbar-level').textContent = me.level;
     document.getElementById('topbar-rating').textContent = me.rating;
@@ -286,7 +286,7 @@ const AppModule = (() => {
     const content = document.getElementById('right-panel-content');
     content.innerHTML = `
       <div style="text-align:center;margin-bottom:14px;">
-        <div class="avatar-ring lg" style="margin:0 auto 10px;">${escapeHtml(player.username[0])}</div>
+        <div class="avatar-ring lg" style="margin:0 auto 10px;">${avatarHtml(player.username)}</div>
         <strong style="font-family:var(--font-display);font-size:16px;">${escapeHtml(player.username)}</strong>
         <p style="color:var(--text-dim);font-size:12.5px;margin-top:2px;">Level ${player.level} · ${dist.toFixed(1)} KM</p>
       </div>
@@ -335,9 +335,9 @@ const AppModule = (() => {
     const oppName = getOpponent(match, me.username);
     const opp = getUser(oppName);
     document.getElementById('match-found-avatars').innerHTML = `
-      <div class="avatar-ring">${escapeHtml(me.username[0])}</div>
+      <div class="avatar-ring">${avatarHtml(me.username)}</div>
       <span class="match-found-vs">VS</span>
-      <div class="avatar-ring">${escapeHtml(opp.username[0])}</div>
+      <div class="avatar-ring">${avatarHtml(opp.username)}</div>
     `;
     document.getElementById('modal-match-found').classList.remove('hidden');
     document.getElementById('btn-mf-open').onclick = () => {

@@ -20,9 +20,9 @@ const DuelModule = (() => {
       <button class="icon-btn modal-close" id="ms-close">✕</button>
       <h2 style="text-align:center;margin-bottom:18px;">Match</h2>
       <div class="dr-vs-row">
-        <div class="dr-player"><div class="avatar-ring lg">${escapeHtml(me.username[0])}</div><div class="dr-player-name">${escapeHtml(me.username)}</div><div class="match-card-meta">⭐ ${me.rating}</div></div>
+        <div class="dr-player"><div class="avatar-ring lg">${avatarHtml(me.username)}</div><div class="dr-player-name">${escapeHtml(me.username)}</div><div class="match-card-meta">⭐ ${me.rating}</div></div>
         <div class="dr-vs-mid">VS</div>
-        <div class="dr-player"><div class="avatar-ring lg">${escapeHtml(opp.username[0])}</div><div class="dr-player-name">${escapeHtml(opp.username)}</div><div class="match-card-meta">⭐ ${opp.rating}</div></div>
+        <div class="dr-player"><div class="avatar-ring lg">${avatarHtml(opp.username)}</div><div class="dr-player-name">${escapeHtml(opp.username)}</div><div class="match-card-meta">⭐ ${opp.rating}</div></div>
       </div>
       <div class="profile-modal-stats">
         <div class="pm-stat"><b>${opp.wins}-${opp.losses}</b><span>W-L Lawan</span></div>
@@ -182,9 +182,9 @@ const DuelModule = (() => {
     el.innerHTML = `
       <span class="dr-mode-badge">SPORT MATCH · FAIR PLAY</span>
       <div class="dr-vs-row">
-        <div class="dr-player"><div class="avatar-ring">${escapeHtml(me.username[0])}</div><div class="dr-player-name">${escapeHtml(me.username)}</div></div>
+        <div class="dr-player"><div class="avatar-ring">${avatarHtml(me.username)}</div><div class="dr-player-name">${escapeHtml(me.username)}</div></div>
         <div class="dr-vs-mid">VS</div>
-        <div class="dr-player"><div class="avatar-ring">${escapeHtml(opp.username[0])}</div><div class="dr-player-name">${escapeHtml(opp.username)}</div></div>
+        <div class="dr-player"><div class="avatar-ring">${avatarHtml(opp.username)}</div><div class="dr-player-name">${escapeHtml(opp.username)}</div></div>
       </div>
       <div class="dr-timer">${mins}:${secs}</div>
       <div class="dr-round">ROUND ${d.round}</div>

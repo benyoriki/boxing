@@ -31,7 +31,7 @@ const RankingModule = (() => {
     list.innerHTML = players.map((p, i) => `
       <div class="rank-row ${p.username === me.username ? 'me' : ''}">
         <div class="rank-pos">${i+1}</div>
-        <div class="avatar-ring sm">${escapeHtml(p.username[0])}</div>
+        <div class="avatar-ring sm">${avatarHtml(p.username)}</div>
         <div class="rank-name">${escapeHtml(p.username)}${p.username === me.username ? ' (kamu)' : ''}</div>
         <div class="rank-rating">${p.rating}</div>
       </div>

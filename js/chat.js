@@ -23,7 +23,7 @@ const ChatModule = (() => {
     const panel = document.getElementById('chat-panel-content');
     panel.innerHTML = `
       <div class="chat-head">
-        <div class="avatar-ring sm">${escapeHtml(opp.username[0])}</div>
+        <div class="avatar-ring sm">${avatarHtml(opp.username)}</div>
         <div class="chat-head-name">${escapeHtml(opp.username)}</div>
         <div class="chat-head-actions">
           <button class="icon-btn" id="chat-report" title="Report">🚩</button>

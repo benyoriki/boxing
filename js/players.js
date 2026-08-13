@@ -46,7 +46,7 @@ const PlayersModule = (() => {
       card.innerHTML = `
         <div class="sc-badge pass">PASS</div>
         <div class="sc-badge like">TANTANG</div>
-        <div class="player-photo">${escapeHtml(p.username[0])}</div>
+        <div class="player-photo">${avatarHtml(p.username)}</div>
         <div class="sc-name">${escapeHtml(p.username)}</div>
         <div class="sc-sub"><span>Lvl ${p.level}</span><span>⭐ ${p.rating}</span><span>${p.dist.toFixed(1)} KM</span></div>
         <span class="sc-style">${escapeHtml(p.style)}</span>
@@ -149,7 +149,7 @@ const PlayersModule = (() => {
     modal.innerHTML = `
       <button class="icon-btn modal-close" id="pp-close">✕</button>
       <div class="profile-modal-head">
-        <div class="avatar-ring lg">${escapeHtml(p.username[0])}</div>
+        <div class="avatar-ring lg">${avatarHtml(p.username)}</div>
         <div>
           <h2>${escapeHtml(p.username)}</h2>
           <p style="color:var(--text-dim);font-size:13px;">Level ${p.level} · ${escapeHtml(p.style)} · ${p.city ? escapeHtml(p.city) : ''}</p>
@@ -219,7 +219,7 @@ const PlayersModule = (() => {
         actionLabel = '🔁 DUEL LAGI';
         actionHandler = () => DuelModule.openMatchScreen(m.id);
       } else if (challenge && challenge.status === 'declined') {
-        statusHtml = '<span class="match-status pending">DITOLAK</span>';
+        statusHtml = '<span class="match-status rejected">DITOLAK</span>';
         actionLabel = '⚔️ TANTANG LAGI';
       }
 
@@ -227,7 +227,7 @@ const PlayersModule = (() => {
       card.className = 'match-card';
       card.innerHTML = `
         <div class="match-card-top">
-          <div class="avatar-ring">${escapeHtml(opp.username[0])}</div>
+          <div class="avatar-ring">${avatarHtml(opp.username)}</div>
           <div>
             <div class="match-card-name">${escapeHtml(opp.username)}</div>
             <div class="match-card-meta">Lvl ${opp.level} · ⭐ ${opp.rating} · ${escapeHtml(opp.style)}</div>
