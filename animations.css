@@ -1,0 +1,79 @@
+/* ============================================================
+   DUEL BOXING — Animations (kept lightweight for performance)
+   ============================================================ */
+
+@keyframes fadeUp{
+  from{ opacity:0; transform: translateY(10px); }
+  to{ opacity:1; transform: translateY(0); }
+}
+
+@keyframes floatIn{
+  from{ opacity:0; transform: translateY(18px) scale(.98); }
+  to{ opacity:1; transform: translateY(0) scale(1); }
+}
+
+@keyframes pulseRing{
+  0%{ transform: scale(0.85); opacity:.8; }
+  100%{ transform: scale(1.5); opacity:0; }
+}
+
+@keyframes pulseScale{
+  0%, 100%{ transform: scale(1); }
+  50%{ transform: scale(1.05); }
+}
+
+@keyframes toastIn{
+  from{ opacity:0; transform: translateY(-12px); }
+  to{ opacity:1; transform: translateY(0); }
+}
+@keyframes toastOut{
+  to{ opacity:0; transform: translateY(-12px); }
+}
+
+@keyframes popIn{
+  from{ opacity:0; transform: scale(.9); }
+  to{ opacity:1; transform: scale(1); }
+}
+
+.modal, .duelroom, .chat-panel, .notif-panel{ animation: popIn .28s var(--ease-snap); }
+.match-found-avatars .avatar-ring{ animation: popIn .4s ease; }
+
+/* Swipe card fly-off states (JS toggles these classes) */
+.swipe-card.fly-left{ transform: translateX(-140%) rotate(-22deg); opacity:0; }
+.swipe-card.fly-right{ transform: translateX(140%) rotate(22deg); opacity:0; }
+
+/* Score bump */
+@keyframes bump{
+  0%{ transform: scale(1); }
+  40%{ transform: scale(1.08); }
+  100%{ transform: scale(1); }
+}
+.bump{ animation: bump .3s ease; }
+
+@keyframes typingBounce{
+  0%, 60%, 100%{ transform: translateY(0); opacity:.5; }
+  30%{ transform: translateY(-4px); opacity:1; }
+}
+
+/* ---------- New ambient/aurora animations (v2026 redesign) ---------- */
+@keyframes gridDrift{
+  from{ background-position: 0 0, 0 0; }
+  to{ background-position: 44px 44px, 44px 44px; }
+}
+
+@keyframes orbFloat{
+  0%, 100%{ transform: translate(0,0) scale(1); }
+  50%{ transform: translate(24px,-18px) scale(1.06); }
+}
+
+@keyframes auroraSpin{
+  from{ transform: rotate(0deg); }
+  to{ transform: rotate(360deg); }
+}
+
+@keyframes particleRise{
+  from{ transform: translateY(0); opacity:0; }
+  10%{ opacity:.55; }
+  90%{ opacity:.35; }
+  to{ transform: translateY(-100vh); opacity:0; }
+}

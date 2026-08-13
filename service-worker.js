@@ -3,24 +3,25 @@
    Basic cache-first strategy for app shell (demo-level PWA).
    ============================================================ */
 
-const CACHE_NAME = 'duel-boxing-v9';
+const CACHE_NAME = 'duel-boxing-v10';
 const APP_SHELL = [
   './',
   './index.html',
   './manifest.json',
-  './css/style.css',
-  './css/responsive.css',
-  './css/animations.css',
-  './js/data.js',
-  './js/map.js',
-  './js/players.js',
-  './js/duel.js',
-  './js/chat.js',
-  './js/ranking.js',
-  './js/admin.js',
-  './js/app.js',
-  './assets/icons/icon-192.svg',
-  './assets/icons/icon-512.svg',
+  './style.css',
+  './responsive.css',
+  './animations.css',
+  './data.js',
+  './avatars.js',
+  './map.js',
+  './players.js',
+  './duel.js',
+  './chat.js',
+  './ranking.js',
+  './admin.js',
+  './app.js',
+  './icon-192.svg',
+  './icon-512.svg',
 ];
 
 self.addEventListener('install', (event) => {

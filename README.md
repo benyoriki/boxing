@@ -32,7 +32,7 @@ Login demo: klik **"masuk sebagai tamu demo"** di halaman login, atau daftar aku
 
 ## Deploy ke GitHub Pages
 
-1. Buat repository baru di GitHub, lalu upload seluruh isi folder `duel-boxing/` (bukan foldernya, tapi isinya) ke root repo — atau push lewat git:
+1. Buat repository baru di GitHub, lalu upload seluruh file (semuanya rata di root, tanpa folder) ke root repo — atau push lewat git:
    ```bash
    git init
    git add .
@@ -48,32 +48,31 @@ Tidak perlu build step — semua file sudah siap pakai (vanilla HTML/CSS/JS).
 
 ## Struktur proyek
 
+Semua file sengaja diletakkan rata (flat) sejajar `index.html` — tidak ada subfolder — supaya gampang di-upload/dikelola langsung dari root repo GitHub:
+
 ```
-duel-boxing/
-├── index.html          # Single-page app: auth + seluruh view (map, duel, match, rank, dst)
-├── css/
-│   ├── style.css        # Design tokens & seluruh komponen
-│   ├── responsive.css    # Breakpoints mobile → desktop
-│   └── animations.css    # Keyframes ringan
-├── js/
-│   ├── data.js           # LocalStorage layer + dummy player data (siap diganti Firebase)
-│   ├── map.js             # Leaflet map + geolocation + filter
-│   ├── players.js         # Swipe deck, player profile modal, matches list
-│   ├── duel.js             # Challenge flow, Duel Room, Tournament
-│   ├── chat.js              # Chat pasca-match + report/block
-│   ├── ranking.js            # Leaderboard
-│   ├── admin.js                # Admin dashboard
-│   └── app.js                   # Router, auth, topbar, notifications, profile
-├── assets/
-│   ├── logo.svg
-│   └── icons/icon-192.svg, icon-512.svg
-├── manifest.json
-└── service-worker.js
+index.html          # Single-page app: auth + seluruh view (map, duel, match, rank, dst)
+style.css            # Design tokens & seluruh komponen
+responsive.css        # Breakpoints mobile → desktop
+animations.css          # Keyframes ringan
+data.js              # LocalStorage layer + dummy player data (siap diganti Firebase)
+avatars.js            # Generator avatar SVG unik per username (fail-safe, tanpa file gambar)
+map.js                  # Leaflet map + geolocation + filter
+players.js               # Swipe deck, player profile modal, matches list
+duel.js                   # Challenge flow, Duel Room, Tournament
+chat.js                    # Chat pasca-match + report/block
+ranking.js                  # Leaderboard
+admin.js                     # Admin dashboard
+app.js                        # Router, auth, topbar, notifications, profile
+logo.svg
+icon-192.svg, icon-512.svg
+manifest.json
+service-worker.js
 ```
 
 ## Menghubungkan ke Firebase (langkah selanjutnya)
 
-Semua fungsi baca/tulis data ada terpusat di `js/data.js` (mis. `getUsers()`, `saveUser()`, `createMatch()`, `createChallenge()`, dst). Untuk migrasi ke backend nyata:
+Semua fungsi baca/tulis data ada terpusat di `data.js` (mis. `getUsers()`, `saveUser()`, `createMatch()`, `createChallenge()`, dst). Untuk migrasi ke backend nyata:
 
 1. Ganti isi setiap fungsi di `data.js` dari `localStorage`/`JSON.parse` menjadi pemanggilan Firestore/Realtime Database (mis. `getDocs`, `setDoc`, `onSnapshot` untuk data real-time).
 2. Ganti simulasi lawan (`recordSwipe`, auto-accept challenge) dengan event real dari user lain.
