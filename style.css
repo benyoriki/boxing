@@ -375,6 +375,18 @@ a{ color:inherit; }
 }
 
 /* Leaflet marker custom */
+/* Smooth "gliding" movement: dummy players update position via
+   marker.setLatLng() on a timer rather than being torn down and
+   recreated, and Leaflet positions markers with a CSS transform — so
+   transitioning that transform makes them visibly walk/drive around
+   instead of teleporting every few seconds. Excluded during active
+   dragging so panning the map by hand still feels instant. */
+.leaflet-marker-icon{
+  transition: transform 1.7s cubic-bezier(.4,0,.2,1);
+}
+.leaflet-dragging .leaflet-marker-icon{
+  transition: none;
+}
 .player-marker{
   width:44px; height:44px; border-radius:50%;
   display:flex; align-items:center; justify-content:center;
@@ -715,6 +727,7 @@ a{ color:inherit; }
 .profile-section{ margin-bottom:24px; }
 .profile-section h3{ font-family: var(--font-display); font-size:15px; font-weight:700; margin-bottom:10px; color: var(--text-dim); letter-spacing:.03em; }
 .profile-actions{ display:flex; gap:10px; flex-wrap:wrap; margin-top:10px; }
+.profile-actions #btn-logout-profile{ margin-top:14px; padding-top:18px; border-top:1px solid var(--border-soft); }
 
 .edit-profile-form{ display:flex; flex-direction:column; gap:12px; max-width:340px; }
 .edit-profile-form label{ display:flex; flex-direction:column; gap:6px; font-size:12px; color: var(--text-dim); font-weight:600; }

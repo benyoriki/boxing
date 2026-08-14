@@ -346,23 +346,25 @@ function pushActivity(text) {
   dbSet(DB_KEYS_ACTIVITY, log.slice(0, 25));
 }
 
-function simulateDummyActivity() {
+function simulateDummyActivity(ctx) {
+  ctx = ctx || {};
   const users = getUsers();
   const dummies = Object.values(users).filter(u => u.isDummy && !u.banned);
   if (dummies.length === 0) return [];
   const events = [];
 
-  // 1) Movement: a few random dummies drift a little around their home spot,
-  //    like they're actually walking/driving around the neighborhood.
-  const moveCount = 2 + Math.floor(Math.random() * 3);
+  // 1) Movement: several random dummies drift a little around their home
+  //    spot, like they're actually walking/driving around the neighborhood.
+  //    Markers glide smoothly (see .leaflet-marker-icon transition in CSS)
+  //    so this reads as motion, not teleporting.
+  const moveCount = 3 + Math.floor(Math.random() * 4);
   for (let i = 0; i < moveCount; i++) {
     const p = dummies[Math.floor(Math.random() * dummies.length)];
     const home = { lat: p.homeLat ?? p.lat, lng: p.homeLng ?? p.lng };
-    const jitter = 0.0015; // small step
+    const jitter = 0.0022;
     let nextLat = p.lat + (Math.random() - 0.5) * jitter;
     let nextLng = p.lng + (Math.random() - 0.5) * jitter;
-    // keep it on a leash so nobody wanders off the map permanently
-    const maxDrift = 0.012;
+    const maxDrift = 0.014;
     if (Math.abs(nextLat - home.lat) > maxDrift || Math.abs(nextLng - home.lng) > maxDrift) {
       nextLat = home.lat + (Math.random() - 0.5) * maxDrift;
       nextLng = home.lng + (Math.random() - 0.5) * maxDrift;
@@ -371,22 +373,31 @@ function simulateDummyActivity() {
     users[p.username] = p;
   }
 
-  // 2) Status flicker: one random dummy changes online/away/offline.
-  if (Math.random() < 0.6) {
+  // 2) Status flicker: one or two random dummies change online/away/offline.
+  const flickerCount = Math.random() < 0.7 ? 1 : 2;
+  for (let i = 0; i < flickerCount; i++) {
     const p = dummies[Math.floor(Math.random() * dummies.length)];
     const roll = Math.random();
     const newStatus = roll < 0.65 ? 'online' : roll < 0.88 ? 'away' : 'offline';
     if (p.status !== newStatus) {
       p.status = newStatus;
       users[p.username] = p;
-      if (newStatus === 'online') events.push(`⚡ ${p.username} baru saja online`);
+      if (newStatus === 'online') {
+        let text = `⚡ ${p.username} baru saja online`;
+        if (ctx.myLat != null && ctx.myLng != null) {
+          const d = distanceKm(ctx.myLat, ctx.myLng, p.lat, p.lng);
+          if (d <= 15) text = `⚡ ${p.username} baru online, ${d.toFixed(1)} km dari kamu`;
+        }
+        events.push(text);
+      }
     }
   }
 
   // 3) Background duel between two dummies, purely cosmetic (keeps the
   //    leaderboard and win/loss records feeling alive between the user's
-  //    own matches).
-  if (dummies.length >= 2 && Math.random() < 0.22) {
+  //    own matches). Occasionally flags if the winner just overtook the
+  //    viewer's own rating — a small competitive nudge.
+  if (dummies.length >= 2 && Math.random() < 0.26) {
     const a = dummies[Math.floor(Math.random() * dummies.length)];
     let b = dummies[Math.floor(Math.random() * dummies.length)];
     let guard = 0;
@@ -396,6 +407,7 @@ function simulateDummyActivity() {
       const winner = aWins ? a : b;
       const loser = aWins ? b : a;
       const delta = 8 + Math.floor(Math.random() * 18);
+      const winnerRatingBefore = winner.rating;
       winner.wins += 1;
       winner.rating += delta;
       loser.losses += 1;
@@ -403,7 +415,32 @@ function simulateDummyActivity() {
       users[winner.username] = winner;
       users[loser.username] = loser;
       events.push(`🥊 ${winner.username} mengalahkan ${loser.username} (+${delta} rating)`);
+      const me = ctx.myUsername ? users[ctx.myUsername] : null;
+      if (me && winnerRatingBefore <= me.rating && winner.rating > me.rating) {
+        events.push(`📈 ${winner.username} baru saja melewati rating kamu!`);
+      }
     }
+  }
+
+  // 4) Ambient flavor text — no state change, just makes the arena feel busy.
+  if (Math.random() < 0.3) {
+    const p = dummies[Math.floor(Math.random() * dummies.length)];
+    if (p.status !== 'offline') {
+      const flavor = [
+        `🔎 ${p.username} sedang mencari lawan...`,
+        `🎟️ ${p.username} mendaftar ke turnamen`,
+        `🔥 ${p.username} sedang naik daun di ranking`,
+      ];
+      events.push(flavor[Math.floor(Math.random() * flavor.length)]);
+    }
+  }
+
+  // 5) Occasional level-up for a dummy with enough XP headroom.
+  if (Math.random() < 0.12) {
+    const p = dummies[Math.floor(Math.random() * dummies.length)];
+    p.level = (p.level || 1) + 1;
+    users[p.username] = p;
+    events.push(`⭐ ${p.username} naik ke Level ${p.level}`);
   }
 
   dbSet(DB_KEYS.USERS, users);
@@ -428,11 +465,45 @@ const DUMMY_CHAT_OPENERS = [
   'Rating kamu naik terus nih, hati-hati aku kejar!',
   'Btw kamu biasa latihan di gym mana?',
   'Gas, kapan free buat sparring santai?',
+  'Baru pemanasan nih, kamu udah di mana?',
+  'Liat statistik kamu, lumayan solid juga 👀',
+  'Woy, jangan sombong dulu ya menang kemarin 😏',
+  'Aku tantang lagi ah, penasaran sama gaya kamu',
+  'Sinyal di gym lagi jelek, chat aja dulu ya',
+  'Eh serius nih rating kamu segini? Respect 💯',
 ];
 
-// Pick a matched, non-offline dummy and have them send a spontaneous chat
-// message. Returns { matchId, username, text } or null if nobody's around.
-function simulateDummyMessage(myUsername) {
+// Even a brand-new player who hasn't matched anyone yet should feel the
+// roster is alive — an unmatched, currently-active dummy occasionally
+// "swipes right" on you first: instantly forming a match AND sending an
+// opening challenge, so there's always something happening even before
+// you've manually browsed Find Opponent.
+function simulateFreshChallengeRequest(myUsername) {
+  const users = getUsers();
+  const already = new Set(getMatchesForUser(myUsername).map(m => getOpponent(m, myUsername)));
+  const candidates = Object.values(users).filter(u =>
+    u.isDummy && !u.banned && u.username !== myUsername && u.status === 'online' && !already.has(u.username)
+  );
+  if (candidates.length === 0) return null;
+  const p = candidates[Math.floor(Math.random() * candidates.length)];
+  const match = createMatch(myUsername, p.username);
+  const modes = ['Boxing', 'Kickboxing', 'MMA', 'Martial Arts'];
+  const durations = ['3 Menit', '5 Menit', '10 Menit'];
+  const locations = ['Virtual Arena', 'Official Gym', 'Sports Arena'];
+  const ch = createChallenge(
+    match.id, p.username, myUsername,
+    modes[Math.floor(Math.random() * modes.length)],
+    durations[Math.floor(Math.random() * durations.length)],
+    locations[Math.floor(Math.random() * locations.length)]
+  );
+  return { match, challenge: ch, username: p.username };
+}
+
+
+// Pick a matched, non-offline dummy who might send a spontaneous chat
+// message — WITHOUT sending it yet, so the caller can show a "typing..."
+// beat first. Returns { matchId, username, text } or null if nobody's around.
+function prepareDummyMessage(myUsername) {
   const matches = getMatchesForUser(myUsername);
   const candidates = matches
     .map(m => ({ match: m, opp: getUser(getOpponent(m, myUsername)) }))
@@ -440,9 +511,24 @@ function simulateDummyMessage(myUsername) {
   if (candidates.length === 0) return null;
   const pick = candidates[Math.floor(Math.random() * candidates.length)];
   const text = DUMMY_CHAT_OPENERS[Math.floor(Math.random() * DUMMY_CHAT_OPENERS.length)];
-  sendChatMessage(pick.match.id, pick.opp.username, text);
-  addNotification(myUsername, `💬 ${pick.opp.username}: ${text}`);
   return { matchId: pick.match.id, username: pick.opp.username, text };
+}
+
+// Actually persists a message prepared by prepareDummyMessage() and notifies
+// the recipient. Split out so the visual "typing..." delay in app.js doesn't
+// have to duplicate the send/notify logic.
+function commitDummyMessage(prepared, myUsername) {
+  sendChatMessage(prepared.matchId, prepared.username, prepared.text);
+  addNotification(myUsername, `💬 ${prepared.username}: ${prepared.text}`);
+  return prepared;
+}
+
+// Back-compat wrapper (send immediately, no typing beat) — kept in case
+// anything still calls the old synchronous API.
+function simulateDummyMessage(myUsername) {
+  const prepared = prepareDummyMessage(myUsername);
+  if (!prepared) return null;
+  return commitDummyMessage(prepared, myUsername);
 }
 
 // Ambient flavor: an online dummy "checks out" your profile. Purely cosmetic

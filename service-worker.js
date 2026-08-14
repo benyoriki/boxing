@@ -3,7 +3,7 @@
    Basic cache-first strategy for app shell (demo-level PWA).
    ============================================================ */
 
-const CACHE_NAME = 'duel-boxing-v10';
+const CACHE_NAME = 'duel-boxing-v12';
 const APP_SHELL = [
   './',
   './index.html',

@@ -6,7 +6,7 @@
 const MapModule = (() => {
   let map = null;
   let youMarker = null;
-  let markers = [];
+  let markerByUsername = new Map(); // username -> { marker, iconKey } — persisted across renders so position changes glide (see .leaflet-marker-icon transition in CSS) instead of teleporting
   let userLat = -6.4223, userLng = 106.7327; // fallback: Parung, Kab. Bogor, Jawa Barat
   let filters = { distance: 50, minLevel: 0, minRating: 0, style: 'all', onlineOnly: false };
   let nameQuery = '';
@@ -33,18 +33,26 @@ const MapModule = (() => {
   }
 
   // Makes the dummy roster feel alive: they drift, flip status, and duel
-  // each other in the background on a timer. Markers re-render to reflect
-  // it, and any resulting events feed the live-activity ticker in the UI.
-  let activityInterval = null;
+  // each other in the background on a randomized timer (not a robotic fixed
+  // interval — real activity doesn't tick on the second). Markers update in
+  // place so movement glides smoothly; any resulting events feed the
+  // live-activity ticker in the UI.
+  let activityTimer = null;
   function startActivitySimulation() {
-    if (activityInterval) return;
-    activityInterval = setInterval(() => {
-      const events = simulateDummyActivity();
+    if (activityTimer) return;
+    scheduleNext();
+    function scheduleNext() {
+      activityTimer = setTimeout(runOnce, 4200 + Math.random() * 3200);
+    }
+    function runOnce() {
+      const me = getCurrentUser();
+      const events = simulateDummyActivity({ myUsername: me && me.username, myLat: userLat, myLng: userLng });
       renderPlayers();
       if (events.length && typeof AppModule !== 'undefined' && AppModule.pushActivityEvents) {
         AppModule.pushActivityEvents(events);
       }
-    }, 7000);
+      scheduleNext();
+    }
   }
 
   function locateMe() {
@@ -76,13 +84,19 @@ const MapModule = (() => {
     youMarker = L.marker([userLat, userLng], { icon, zIndexOffset: 1000 }).addTo(map).bindPopup('📍 YOU');
   }
 
-  function renderPlayers() {
-    markers.forEach(m => map.removeLayer(m));
-    markers = [];
+  function buildIcon(p, statusClass, isChatting) {
+    return L.divIcon({
+      className: '',
+      html: `<div class="player-marker ${statusClass}"><span class="marker-avatar-clip">${avatarHtml(p.username)}</span>${isChatting ? '<span class="marker-chat-bubble">💬</span>' : ''}</div>`,
+      iconSize: [44, 44],
+    });
+  }
 
+  function renderPlayers() {
     const users = getUsers();
     const me = getCurrentUser();
     const list = Object.values(users).filter(u => u.username !== (me && me.username));
+    const stillVisible = new Set();
     let visibleCount = 0;
 
     list.forEach(p => {
@@ -96,23 +110,44 @@ const MapModule = (() => {
       if (nameQuery && !p.username.toLowerCase().includes(nameQuery)) return;
 
       visibleCount++;
+      stillVisible.add(p.username);
       const statusClass = p.status === 'online' ? '' : p.status === 'away' ? 'away' : 'offline';
       const isChatting = p.username === chattingUsername;
-      const icon = L.divIcon({
-        className: '',
-        html: `<div class="player-marker ${statusClass}"><span class="marker-avatar-clip">${avatarHtml(p.username)}</span>${isChatting ? '<span class="marker-chat-bubble">💬</span>' : ''}</div>`,
-        iconSize: [44, 44],
-      });
-      const marker = L.marker([p.lat, p.lng], { icon, zIndexOffset: isChatting ? 500 : 0 }).addTo(map);
-      marker.bindPopup(popupHtml(p, dist), { closeButton: true, autoPan: false, className: 'player-popup-wrap' });
-      marker.on('popupopen', () => {
-        const btn = document.getElementById(`pp-profile-${p.username}`);
-        const chBtn = document.getElementById(`pp-challenge-${p.username}`);
-        if (btn) btn.onclick = () => PlayersModule.showPlayerProfile(p.username);
-        if (chBtn) chBtn.onclick = () => PlayersModule.quickChallenge(p.username);
-      });
-      marker.on('click', () => AppModule.showRightPanel(p, dist));
-      markers.push(marker);
+      const iconKey = statusClass + '|' + (isChatting ? 1 : 0);
+
+      const existing = markerByUsername.get(p.username);
+      if (existing) {
+        // Only the position changed (the common case, every activity tick) —
+        // setLatLng lets the marker glide via CSS transition instead of the
+        // marker being torn down and recreated, which used to make dummies
+        // appear to teleport around the map every few seconds.
+        existing.marker.setLatLng([p.lat, p.lng]);
+        existing.marker.setPopupContent(popupHtml(p, dist));
+        if (existing.iconKey !== iconKey) {
+          existing.marker.setIcon(buildIcon(p, statusClass, isChatting));
+          existing.iconKey = iconKey;
+        }
+      } else {
+        const marker = L.marker([p.lat, p.lng], { icon: buildIcon(p, statusClass, isChatting), zIndexOffset: isChatting ? 500 : 0 }).addTo(map);
+        marker.bindPopup(popupHtml(p, dist), { closeButton: true, autoPan: false, className: 'player-popup-wrap' });
+        marker.on('popupopen', () => {
+          const btn = document.getElementById(`pp-profile-${p.username}`);
+          const chBtn = document.getElementById(`pp-challenge-${p.username}`);
+          if (btn) btn.onclick = () => PlayersModule.showPlayerProfile(p.username);
+          if (chBtn) chBtn.onclick = () => PlayersModule.quickChallenge(p.username);
+        });
+        marker.on('click', () => AppModule.showRightPanel(p, dist));
+        markerByUsername.set(p.username, { marker, iconKey });
+      }
+    });
+
+    // Drop markers for players who are no longer visible (filtered out,
+    // blocked, went offline while onlineOnly is on, etc.)
+    markerByUsername.forEach((entry, username) => {
+      if (!stillVisible.has(username)) {
+        map.removeLayer(entry.marker);
+        markerByUsername.delete(username);
+      }
     });
 
     document.getElementById('map-empty').classList.toggle('hidden', visibleCount > 0);

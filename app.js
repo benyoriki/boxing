@@ -78,6 +78,7 @@ const ProfileModule = (() => {
         <button class="btn btn-primary" id="btn-edit-profile">EDIT PROFILE</button>
         <button class="btn btn-secondary" id="btn-privacy">PRIVACY</button>
         ${AdminModule.isAdmin(me) ? '<button class="btn btn-secondary" id="btn-goto-admin">🛠️ ADMIN DASHBOARD</button>' : ''}
+        <button class="btn btn-ghost btn-block" id="btn-logout-profile">🚪 KELUAR</button>
       </div>
     `;
     panel.querySelectorAll('[data-unblock]').forEach(btn => {
@@ -85,6 +86,9 @@ const ProfileModule = (() => {
     });
     document.getElementById('btn-edit-profile').onclick = () => { editing = true; render(); };
     document.getElementById('btn-privacy').onclick = () => { AppModule.switchView('rules'); };
+    document.getElementById('btn-logout-profile').onclick = () => {
+      if (confirm('Yakin ingin keluar dari akun ini?')) AppModule.logout();
+    };
     const adminBtn = document.getElementById('btn-goto-admin');
     if (adminBtn) adminBtn.onclick = () => AppModule.switchView('admin');
   }
@@ -229,7 +233,11 @@ const AppModule = (() => {
     bindNav();
     bindModals();
     RankingModule.bindFilterChips();
-    MapModule.init();
+    // Isolated: if the Leaflet/OSM CDN is slow, blocked, or offline, a
+    // failure here must not take the rest of the app down with it — nav,
+    // matches, ranking, and the activity simulations below are otherwise
+    // completely independent of the map.
+    try { MapModule.init(); } catch (e) { console.warn('MapModule failed to initialize —', e); }
     switchView('map');
     simulateIncomingChallenges();
     simulateDummySocialActivity();
@@ -416,70 +424,109 @@ const AppModule = (() => {
   }
 
   // Demo multiplayer simulation: since this build has no real backend, dummy
-  // opponents you've already matched with will occasionally send YOU a duel
-  // challenge, which is what actually exercises the "incoming challenge"
-  // accept/decline flow (DuelModule.showIncomingChallenge was previously dead
-  // code — nothing ever called it).
+  // opponents will occasionally send YOU a duel challenge — either a
+  // rematch-style challenge on a match you already have, or (if you haven't
+  // matched anyone yet) a fresh "swipe" from a nearby active dummy that
+  // instantly forms a match AND opens with a challenge. Timing is randomized
+  // rather than a fixed interval so it reads as organic activity, not a
+  // metronome.
   function simulateIncomingChallenges() {
-    setInterval(() => {
+    scheduleNext();
+
+    function scheduleNext() {
+      setTimeout(runOnce, 9000 + Math.random() * 8000);
+    }
+
+    function runOnce() {
+      scheduleNext();
       const me = getCurrentUser();
       if (!me) return;
       updateNotifDot();
 
       const anyModalOpen = document.querySelectorAll('.modal-backdrop:not(.hidden)').length > 0;
       if (anyModalOpen) return;
-      if (Math.random() > 0.5) return;
+      if (Math.random() > 0.62) return;
 
       const myMatches = getMatchesForUser(me.username);
       const candidates = myMatches
         .map(m => ({ match: m, opp: getUser(getOpponent(m, me.username)) }))
         .filter(x => x.opp && x.opp.isDummy && !x.opp.banned && !getChallengeForMatch(x.match.id));
-      if (candidates.length === 0) return;
 
-      const pick = candidates[Math.floor(Math.random() * candidates.length)];
       const modes = ['Boxing', 'Kickboxing', 'MMA', 'Martial Arts'];
       const durations = ['3 Menit', '5 Menit', '10 Menit'];
       const locations = ['Virtual Arena', 'Official Gym', 'Sports Arena'];
-      const ch = createChallenge(
-        pick.match.id, pick.opp.username, me.username,
-        modes[Math.floor(Math.random()*modes.length)],
-        durations[Math.floor(Math.random()*durations.length)],
-        locations[Math.floor(Math.random()*locations.length)]
-      );
+
+      let ch, oppUsername;
+      if (candidates.length > 0) {
+        const pick = candidates[Math.floor(Math.random() * candidates.length)];
+        ch = createChallenge(
+          pick.match.id, pick.opp.username, me.username,
+          modes[Math.floor(Math.random()*modes.length)],
+          durations[Math.floor(Math.random()*durations.length)],
+          locations[Math.floor(Math.random()*locations.length)]
+        );
+        oppUsername = pick.opp.username;
+      } else {
+        // Nobody matched yet (e.g. a brand-new account) — a nearby active
+        // dummy challenges you first, so the app never feels empty/dead.
+        const res = simulateFreshChallengeRequest(me.username);
+        if (!res) return;
+        ch = res.challenge;
+        oppUsername = res.username;
+        MapModule.refresh();
+      }
+
       updateNotifDot();
+      if (currentView === 'map') MapModule.pulseMarker(oppUsername);
       DuelModule.showIncomingChallenge(ch);
       if (currentView === 'matches') PlayersModule.renderMatchesList();
-    }, 14000);
+    }
   }
 
   // Independent of duel challenges: matched dummies occasionally send you a
   // message out of the blue, or "check out" your profile — small ambient
   // touches that make the roster feel like real people online right now.
+  // Timing is randomized (not a fixed interval) for the same reason as above.
   function simulateDummySocialActivity() {
-    setInterval(() => {
+    scheduleNext();
+
+    function scheduleNext() {
+      setTimeout(runOnce, 6000 + Math.random() * 6000);
+    }
+
+    function runOnce() {
+      scheduleNext();
       const me = getCurrentUser();
       if (!me) return;
       const anyModalOpen = document.querySelectorAll('.modal-backdrop:not(.hidden)').length > 0;
       const roll = Math.random();
 
-      if (roll < 0.35) {
-        const res = simulateDummyMessage(me.username);
-        if (!res) return;
-        updateNotifDot();
-        if (currentView === 'map') MapModule.pulseMarker(res.username);
+      if (roll < 0.4) {
+        const prepared = prepareDummyMessage(me.username);
+        if (!prepared) return;
         const chatModalOpen = !document.getElementById('modal-chat').classList.contains('hidden');
-        const chatIsForThisMatch = chatModalOpen && ChatModule.getCurrentMatchId() === res.matchId;
-        if (chatIsForThisMatch) {
-          ChatModule.render();
-        } else if (!anyModalOpen) {
-          toast(`💬 ${res.username}: ${res.text}`);
-        }
-        if (currentView === 'matches') PlayersModule.renderMatchesList();
-      } else if (roll < 0.55) {
+        const chatIsForThisMatch = chatModalOpen && ChatModule.getCurrentMatchId() === prepared.matchId;
+
+        // If you're already looking at that conversation, show a realistic
+        // "typing..." beat before the message actually lands.
+        if (chatIsForThisMatch) ChatModule.showTyping();
+
+        setTimeout(() => {
+          commitDummyMessage(prepared, me.username);
+          updateNotifDot();
+          if (currentView === 'map') MapModule.pulseMarker(prepared.username);
+          if (chatIsForThisMatch) {
+            ChatModule.render();
+          } else if (!anyModalOpen) {
+            toast(`💬 ${prepared.username}: ${prepared.text}`);
+          }
+          if (currentView === 'matches') PlayersModule.renderMatchesList();
+        }, chatIsForThisMatch ? 1100 + Math.random() * 1100 : 0);
+      } else if (roll < 0.62) {
         const res = simulateDummyProfileView(me.username);
         if (res) updateNotifDot();
       }
-    }, 11000);
+    }
   }
 
   function timeAgo(ts) {
@@ -523,7 +570,7 @@ const AppModule = (() => {
     }
   }
 
-  return { init, switchView, refreshTopbar, showRightPanel, showMatchFound, pushActivityEvents };
+  return { init, switchView, refreshTopbar, showRightPanel, showMatchFound, pushActivityEvents, logout };
 })();
 
 document.addEventListener('DOMContentLoaded', () => AppModule.init());
