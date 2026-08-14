@@ -330,7 +330,7 @@ a{ color:inherit; }
 .view-head{ display:flex; align-items:center; justify-content:space-between; margin-bottom:18px; gap: 12px; flex-wrap: wrap; }
 .view-head h1{
   font-family: var(--font-display); font-size: 26px; font-weight:700; letter-spacing:.015em;
-  background: linear-gradient(120deg, var(--text) 40%, var(--blue) 120%);
+  background: linear-gradient(95deg, var(--text) 0%, var(--text) 45%, #b8e9f5 100%);
   -webkit-background-clip:text; background-clip:text; color:transparent;
 }
 
@@ -665,12 +665,17 @@ a{ color:inherit; }
 .rank-list{ display:flex; flex-direction:column; gap:8px; }
 .rank-row{ display:flex; align-items:center; gap:14px; padding: 13px 17px; border-radius: var(--radius-md); background: var(--glass); border:1px solid var(--border-soft); transition: transform .18s ease, border-color .18s ease; }
 .rank-row:hover{ transform: translateX(3px); border-color: var(--border-hair); }
-.rank-row.me{ border-color: var(--blue); background: var(--blue-dim); box-shadow: 0 0 18px rgba(53,230,255,0.15); }
 .rank-pos{ font-family: var(--font-mono); font-weight:700; width:28px; text-align:center; color: var(--text-dim); }
 .rank-row:nth-child(1){ border-color: rgba(255,211,92,0.4); background: linear-gradient(90deg, rgba(255,211,92,0.1), var(--glass)); }
 .rank-row:nth-child(1) .rank-pos{ color:#ffd35c; text-shadow: 0 0 10px rgba(255,211,92,0.6); }
-.rank-row:nth-child(2) .rank-pos{ color:#c9d3e0; }
-.rank-row:nth-child(3) .rank-pos{ color:#e0a06b; }
+.rank-row:nth-child(2){ border-color: rgba(201,211,224,0.35); background: linear-gradient(90deg, rgba(201,211,224,0.09), var(--glass)); }
+.rank-row:nth-child(2) .rank-pos{ color:#dde4ee; text-shadow: 0 0 8px rgba(201,211,224,0.55); }
+.rank-row:nth-child(3){ border-color: rgba(224,160,107,0.4); background: linear-gradient(90deg, rgba(224,160,107,0.12), var(--glass)); }
+.rank-row:nth-child(3) .rank-pos{ color:#f0b688; text-shadow: 0 0 8px rgba(224,160,107,0.55); }
+/* Comes after the podium rules on purpose: if the current user IS in the
+   top 3, they must still read clearly as "you" rather than the podium
+   background silently winning the specificity tie. */
+.rank-row.me{ border-color: var(--blue) !important; background: var(--blue-dim) !important; box-shadow: 0 0 18px rgba(53,230,255,0.18); }
 .rank-name{ font-family: var(--font-display); font-weight:700; flex:1; }
 .rank-rating{ font-family: var(--font-mono); font-weight:700; color: var(--blue); }
 
@@ -686,14 +691,28 @@ a{ color:inherit; }
   background: var(--accent); opacity:.13; filter: blur(60px);
 }
 .tournament-hero h2{ font-family: var(--font-display); font-size:23px; font-weight:700; margin-bottom:8px; }
-.tournament-meta{ display:flex; gap:16px; flex-wrap:wrap; font-family: var(--font-mono); font-size:12.5px; color: var(--text-dim); margin-bottom:16px; }
+.tournament-meta{ display:flex; gap:14px; flex-wrap:wrap; font-family: var(--font-mono); font-size:12.5px; color: var(--text-dim); margin-bottom:16px; }
+.tournament-meta span:not(:first-child){ position:relative; padding-left:16px; }
+.tournament-meta span:not(:first-child)::before{ content:'•'; position:absolute; left:0; opacity:.5; }
+.tournament-champion-pick{
+  margin-top:14px; font-size:12.5px; color: var(--text-dim);
+  background: var(--glass); border:1px solid var(--border-soft); border-radius: var(--radius-sm);
+  padding:10px 14px; display:inline-block;
+}
+.tournament-champion-pick b{ color: var(--gold); text-shadow: 0 0 8px rgba(255,200,87,0.4); }
 .bracket{ overflow-x:auto; display:flex; gap:36px; padding: 10px 4px 20px; }
 .bracket-round{ display:flex; flex-direction:column; justify-content:space-around; gap:20px; min-width:170px; }
 .bracket-round-title{ text-align:center; font-family: var(--font-mono); font-size:11px; color: var(--text-faint); letter-spacing:.1em; margin-bottom:6px; }
-.bracket-match{ background: var(--glass); border:1px solid var(--border-soft); border-radius: var(--radius-sm); padding:9px 11px; font-size:12.5px; }
-.bracket-slot{ display:flex; justify-content:space-between; padding:4px 0; }
-.bracket-slot.winner{ color: var(--success); font-weight:700; }
+.bracket-match{ background: var(--glass); border:1px solid var(--border-soft); border-radius: var(--radius-sm); padding:9px 11px; font-size:12.5px; position:relative; transition: border-color .18s ease; }
+.bracket-round.has-next .bracket-match::after{
+  content:''; position:absolute; top:50%; right:-36px; width:36px; height:1px;
+  background: linear-gradient(90deg, var(--border-hair), rgba(255,255,255,0.03));
+}
+.bracket-slot{ display:flex; justify-content:space-between; padding:4px 6px; border-radius:5px; }
+.bracket-slot.winner{ color: var(--success); font-weight:700; background: rgba(43,255,160,0.09); }
+.bracket-slot.winner::after{ content:'✓'; margin-left:6px; opacity:.8; }
 .bracket-slot.tbd{ color: var(--text-faint); }
+.bracket-match:has(.winner) .bracket-slot:not(.winner):not(:has(.tbd)){ opacity:.45; text-decoration: line-through; text-decoration-color: rgba(255,255,255,0.25); }
 
 /* ============================================================
    PROFILE
@@ -713,12 +732,19 @@ a{ color:inherit; }
 .achievements-row{ display:flex; gap:10px; flex-wrap:wrap; margin-bottom:20px; }
 .achievement-chip{ display:flex; align-items:center; gap:6px; background: var(--glass); border:1px solid var(--border-soft); padding:9px 15px; border-radius: var(--radius-pill); font-size:12.5px; font-weight:600; transition: border-color .18s ease; }
 .achievement-chip:hover{ border-color: var(--gold); }
-.achievements-empty, .notif-empty, .swipe-empty, .empty-state{
+.achievements-empty, .notif-empty, .swipe-empty, .empty-state, .history-empty, .blocked-empty{
   text-align:center; padding: 34px 20px; color: var(--text-dim); font-size:13px; line-height:1.6;
   background: var(--glass); border:1px dashed var(--border); border-radius: var(--radius-md);
 }
-.achievements-empty::before, .notif-empty::before{ content:'🏆'; display:block; font-size:30px; margin-bottom:10px; opacity:.5; filter: grayscale(.3); }
+.achievements-empty::before, .notif-empty::before, .swipe-empty::before, .empty-state::before, .history-empty::before, .blocked-empty::before{
+  content:'🏆'; display:block; font-size:30px; margin-bottom:10px; opacity:.5; filter: grayscale(.3);
+}
 .notif-empty::before{ content:'🔔'; }
+.swipe-empty::before{ content:'🔍'; }
+.empty-state::before{ content:'⚔️'; }
+.history-empty::before{ content:'🥊'; }
+.blocked-empty::before{ content:'🛡️'; }
+.swipe-empty p{ margin-bottom:14px; }
 .history-table{ width:100%; border-collapse:collapse; font-size:13px; }
 .history-table th{ text-align:left; color: var(--text-faint); font-weight:600; font-size:11px; text-transform:uppercase; letter-spacing:.04em; padding: 8px 10px; border-bottom:1px solid var(--border-soft); }
 .history-table td{ padding: 10px; border-bottom:1px solid var(--border-soft); }
@@ -767,7 +793,7 @@ a{ color:inherit; }
 /* ============================================================
    TOAST
    ============================================================ */
-.toast-container{ position:fixed; top:16px; left:50%; transform:translateX(-50%); z-index:200; display:flex; flex-direction:column; gap:8px; align-items:center; width:100%; padding: 0 16px; pointer-events:none; }
+.toast-container{ position:fixed; top:80px; left:50%; transform:translateX(-50%); z-index:200; display:flex; flex-direction:column; gap:8px; align-items:center; width:100%; padding: 0 16px; pointer-events:none; }
 .toast{
   background: linear-gradient(165deg, #171d38, #0d1224); border:1px solid var(--border); color: var(--text);
   padding: 13px 22px; border-radius: var(--radius-pill); font-size:13.5px; font-weight:600;

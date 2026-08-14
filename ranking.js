@@ -28,14 +28,15 @@ const RankingModule = (() => {
     players.sort((a,b) => b.rating - a.rating);
 
     const list = document.getElementById('rank-list');
+    const medal = ['🥇', '🥈', '🥉'];
     list.innerHTML = players.map((p, i) => `
       <div class="rank-row ${p.username === me.username ? 'me' : ''}">
-        <div class="rank-pos">${i+1}</div>
+        <div class="rank-pos">${medal[i] || (i+1)}</div>
         <div class="avatar-ring sm">${avatarHtml(p.username)}</div>
         <div class="rank-name">${escapeHtml(p.username)}${p.username === me.username ? ' (kamu)' : ''}</div>
         <div class="rank-rating">${p.rating}</div>
       </div>
-    `).join('') || `<p style="text-align:center;color:var(--text-faint);padding:30px 0;">Belum ada data untuk kategori ini.</p>`;
+    `).join('') || `<div class="empty-state" style="text-align:center;">Belum ada data untuk kategori ini.</div>`;
   }
 
   function bindFilterChips() {

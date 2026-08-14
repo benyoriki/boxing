@@ -105,5 +105,5 @@ const ChatModule = (() => {
     }
   }
 
-  return { open, render, getCurrentMatchId: () => currentMatchId };
+  return { open, render, getCurrentMatchId: () => currentMatchId, showTyping: showTypingBubble };
 })();

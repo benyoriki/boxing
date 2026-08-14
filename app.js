@@ -64,14 +64,14 @@ const ProfileModule = (() => {
               </tr>`;
             }).join('')}
           </tbody>
-        </table>` : `<p style="color:var(--text-faint);font-size:13px;">Belum ada riwayat duel.</p>`}
+        </table>` : `<div class="history-empty">Belum ada riwayat duel.</div>`}
       </div>
 
       <div class="profile-section">
         <h3>Blocked Users</h3>
         ${blocked.length ? blocked.map(b => `
           <div class="blocked-list-item"><span>${escapeHtml(b)}</span><button class="btn btn-secondary btn-sm" data-unblock="${escapeHtml(b)}">UNBLOCK</button></div>
-        `).join('') : `<p style="color:var(--text-faint);font-size:13px;">Tidak ada pengguna yang diblokir.</p>`}
+        `).join('') : `<div class="blocked-empty">Tidak ada pengguna yang diblokir.</div>`}
       </div>
 
       <div class="profile-actions">

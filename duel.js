@@ -303,6 +303,7 @@ const DuelModule = (() => {
     const t = getTournament();
     const joined = t.joined.includes(me.username);
     const panel = document.getElementById('tournament-panel');
+    const bracket = buildBracket(t);
     panel.innerHTML = `
       <div class="tournament-hero">
         <h2>🥊 ${t.name}</h2>
@@ -313,14 +314,15 @@ const DuelModule = (() => {
           <span>${t.joined.length} terdaftar</span>
         </div>
         <button class="btn ${joined ? 'btn-secondary' : 'btn-primary'}" id="tour-join" ${joined ? 'disabled' : ''}>${joined ? '✓ TERDAFTAR' : 'JOIN TOURNAMENT'}</button>
+        <div class="tournament-champion-pick">🏆 Prediksi juara sementara: <b>${escapeHtml(bracket.champion)}</b></div>
       </div>
-      <div class="bracket">${bracketHtml(t)}</div>
+      <div class="bracket">${bracket.html}</div>
     `;
     const btn = document.getElementById('tour-join');
     if (btn && !joined) btn.onclick = () => { joinTournament(me.username); toast('Kamu terdaftar di turnamen!'); renderTournament(); };
   }
 
-  function bracketHtml(t) {
+  function buildBracket(t) {
     const names = [...DUMMY_NAMES.slice(0,8)];
     const round1 = [];
     for (let i=0;i<names.length;i+=2) round1.push([names[i], names[i+1]]);
@@ -330,15 +332,16 @@ const DuelModule = (() => {
     const final = [[round2Winners[0], round2Winners[1]]];
     const champion = final[0][Math.floor(Math.random()*2)];
 
-    function col(title, pairs, winners) {
-      return `<div class="bracket-round"><div class="bracket-round-title">${title}</div>
+    function col(title, pairs, winners, isLast) {
+      return `<div class="bracket-round ${isLast ? '' : 'has-next'}"><div class="bracket-round-title">${title}</div>
         ${pairs.map((p, idx) => `<div class="bracket-match">
           <div class="bracket-slot ${winners && winners[idx]===p[0] ? 'winner' : ''}">${p[0] || '<span class="tbd">TBD</span>'}</div>
           <div class="bracket-slot ${winners && winners[idx]===p[1] ? 'winner' : ''}">${p[1] || '<span class="tbd">TBD</span>'}</div>
         </div>`).join('')}
       </div>`;
     }
-    return col('ROUND 1', round1, round1Winners) + col('SEMIFINAL', round2, round2Winners) + col('FINAL', final, [champion]);
+    const html = col('ROUND 1', round1, round1Winners) + col('SEMIFINAL', round2, round2Winners) + col('FINAL', final, [champion], true);
+    return { html, champion };
   }
 
   return { openMatchScreen, openChallengeForm, showIncomingChallenge, startDuelRoomForMatch, startDuelRoom, renderTournament };
