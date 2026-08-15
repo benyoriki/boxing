@@ -238,6 +238,7 @@ const AppModule = (() => {
     // matches, ranking, and the activity simulations below are otherwise
     // completely independent of the map.
     try { MapModule.init(); } catch (e) { console.warn('MapModule failed to initialize —', e); }
+    renderRightPanelDefault();
     switchView('map');
     simulateIncomingChallenges();
     simulateDummySocialActivity();
@@ -290,9 +291,49 @@ const AppModule = (() => {
   }
 
   /* ---------- RIGHT PANEL (desktop map detail) ---------- */
+  function renderRightPanelDefault() {
+    const content = document.getElementById('right-panel-content');
+    if (!content) return;
+    const me = getCurrentUser();
+    if (!me) return;
+    const winRate = me.wins + me.losses > 0 ? Math.round((me.wins / (me.wins + me.losses)) * 100) : 0;
+    const top3 = Object.values(getUsers())
+      .filter(u => !u.banned)
+      .sort((a, b) => b.rating - a.rating)
+      .slice(0, 3);
+    const medal = ['🥇', '🥈', '🥉'];
+    content.className = '';
+    content.innerHTML = `
+      <div class="rp-self">
+        <div class="avatar-ring" style="width:44px;height:44px;">${avatarHtml(me.username)}</div>
+        <div>
+          <strong>${escapeHtml(me.username)}</strong>
+          <span>${me.rating} rating · ${winRate}% win rate</span>
+        </div>
+      </div>
+      <p class="rp-hint">👆 Pilih pemain di map untuk lihat detail &amp; kirim tantangan.</p>
+      <h4 class="rp-subhead">Top Global</h4>
+      <div class="rp-mini-list">
+        ${top3.map((p, i) => `
+          <div class="rp-mini-row">
+            <span class="rp-mini-medal">${medal[i]}</span>
+            <div class="avatar-ring sm">${avatarHtml(p.username)}</div>
+            <span class="rp-mini-name">${escapeHtml(p.username)}</span>
+            <span class="rp-mini-rating">${p.rating}</span>
+          </div>
+        `).join('')}
+      </div>
+      <button class="btn btn-secondary btn-block rp-viewall" id="rp-view-rank">LIHAT RANKING</button>
+    `;
+    const btn = document.getElementById('rp-view-rank');
+    if (btn) btn.onclick = () => switchView('rank');
+  }
+
   function showRightPanel(player, dist) {
     const content = document.getElementById('right-panel-content');
+    content.className = '';
     content.innerHTML = `
+      <button class="link-btn rp-back" id="rp-back">← Kembali</button>
       <div style="text-align:center;margin-bottom:14px;">
         <div class="avatar-ring lg" style="margin:0 auto 10px;">${avatarHtml(player.username)}</div>
         <strong style="font-family:var(--font-display);font-size:16px;">${escapeHtml(player.username)}</strong>
@@ -309,6 +350,7 @@ const AppModule = (() => {
         <button class="btn btn-primary btn-block" id="rp-challenge">CHALLENGE</button>
       </div>
     `;
+    document.getElementById('rp-back').onclick = renderRightPanelDefault;
     document.getElementById('rp-profile').onclick = () => PlayersModule.showPlayerProfile(player.username);
     document.getElementById('rp-challenge').onclick = () => PlayersModule.quickChallenge(player.username);
   }
@@ -570,7 +612,7 @@ const AppModule = (() => {
     }
   }
 
-  return { init, switchView, refreshTopbar, showRightPanel, showMatchFound, pushActivityEvents, logout };
+  return { init, switchView, refreshTopbar, showRightPanel, renderRightPanelDefault, showMatchFound, pushActivityEvents, logout };
 })();
 
 document.addEventListener('DOMContentLoaded', () => AppModule.init());

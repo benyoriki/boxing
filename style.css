@@ -207,6 +207,12 @@ a{ color:inherit; }
 }
 .particle-field span:nth-child(odd){ background: var(--purple); box-shadow: 0 0 8px var(--purple); }
 
+.auth-layout{
+  position:relative; z-index:1; width:100%; max-width:1180px;
+  display:flex; align-items:center; justify-content:center; gap:64px;
+}
+.auth-showcase{ display:none; }
+
 .auth-card{
   position:relative; z-index:1;
   width:100%; max-width: 440px;
@@ -340,6 +346,28 @@ a{ color:inherit; }
 }
 .right-panel h3{ font-family: var(--font-display); font-size:15px; font-weight:700; letter-spacing:.04em; margin-bottom:14px; color: var(--text-dim); }
 .right-panel-empty{ color: var(--text-faint); font-size:13px; }
+
+.rp-self{
+  display:flex; align-items:center; gap:11px; padding:12px; margin-bottom:14px;
+  background: var(--glass); border:1px solid var(--border-soft); border-radius: var(--radius-md);
+}
+.rp-self strong{ display:block; font-family: var(--font-display); font-size:13.5px; font-weight:700; }
+.rp-self span{ display:block; color: var(--text-faint); font-size:11px; margin-top:2px; }
+.rp-hint{ font-size:12px; color: var(--text-faint); line-height:1.6; margin-bottom:20px; }
+.rp-subhead{
+  font-family: var(--font-mono); font-size:10.5px; letter-spacing:.1em; color: var(--text-faint);
+  text-transform:uppercase; margin-bottom:10px;
+}
+.rp-mini-list{ display:flex; flex-direction:column; gap:7px; margin-bottom:16px; }
+.rp-mini-row{
+  display:flex; align-items:center; gap:9px; padding:8px 9px;
+  background: var(--glass); border:1px solid var(--border-soft); border-radius: var(--radius-sm);
+}
+.rp-mini-medal{ font-size:13px; width:16px; text-align:center; flex-shrink:0; }
+.rp-mini-name{ flex:1; font-size:12.5px; font-weight:600; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.rp-mini-rating{ font-family: var(--font-mono); font-size:12px; color: var(--blue); font-weight:700; }
+.rp-viewall{ font-size:11.5px; }
+.rp-back{ display:block; margin-bottom:14px; font-size:12.5px; }
 
 /* ---------- Bottom nav (mobile) ---------- */
 .bottom-nav{ display:none; }
@@ -509,6 +537,12 @@ a{ color:inherit; }
 .swipe-card .sc-badge.like{ right:20px; border-color: var(--success); color: var(--success); transform: rotate(12deg); }
 
 .swipe-actions{ display:flex; justify-content:center; gap:26px; margin-bottom: 8px; }
+.swipe-queue{ max-width:460px; margin:0 auto; text-align:center; }
+.swipe-queue-label{ display:block; font-family: var(--font-mono); font-size:10.5px; letter-spacing:.08em; color: var(--text-faint); margin-bottom:10px; }
+.swipe-queue-row{ display:flex; justify-content:center; gap:8px; flex-wrap:wrap; }
+.swipe-queue-chip{ opacity:.75; transition: opacity .18s ease, transform .18s ease; cursor:default; }
+.swipe-queue-chip:hover{ opacity:1; transform: translateY(-2px); }
+.swipe-queue-chip .avatar-ring{ width:34px; height:34px; }
 .swipe-btn{
   width:64px; height:64px; border-radius:50%; font-size:24px; display:flex; align-items:center; justify-content:center;
   background: linear-gradient(165deg, #171d38, #0d1224); border:1px solid var(--border); box-shadow: var(--shadow-card);

@@ -63,6 +63,26 @@ const PlayersModule = (() => {
       }
       stage.appendChild(card);
     });
+
+    renderQueueStrip();
+  }
+
+  // Small "who's next" preview strip — mostly a desktop nicety (on a wide
+  // viewport the swipe card alone leaves a lot of empty space) but shows on
+  // mobile too since it's genuinely useful: confirms more candidates are
+  // queued up without needing to swipe through them one by one.
+  function renderQueueStrip() {
+    const el = document.getElementById('swipe-queue');
+    if (!el) return;
+    const upcoming = deck.slice(3, 3 + 10);
+    if (upcoming.length === 0) { el.innerHTML = ''; el.classList.add('hidden'); return; }
+    el.classList.remove('hidden');
+    el.innerHTML = `
+      <span class="swipe-queue-label">Berikutnya (${upcoming.length}${deck.length > 13 ? '+' : ''})</span>
+      <div class="swipe-queue-row">
+        ${upcoming.map(p => `<div class="swipe-queue-chip" title="${escapeHtml(p.username)} · Lvl ${p.level}"><div class="avatar-ring sm">${avatarHtml(p.username)}</div></div>`).join('')}
+      </div>
+    `;
   }
 
   function beginDrag(card, username, x, y) {
